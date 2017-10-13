@@ -155,6 +155,13 @@
 			<systemPath>${basedir}/src/main/resources/ojdbc8.jar</systemPath>
 		</dependency>
 		
+		<!-- apache common -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+		
 		<!-- sql Log -->
 		<dependency>
  			<groupId>org.lazyluke</groupId>
