@@ -6,8 +6,19 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
 	
+	<!-- properties 맵핑 시킴 -->
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:/secret.properties"></property>
+	</bean>
+
 	
-	<bean id="naverLogin" class="com.api.login.naver.NaverLoginBO" />
-			
+	<bean id="naverLogin" class="com.api.login.naver.LoginFactory">
+		<property name="serviceName" value="naver"/>
+		<property name="clientId" value="${naver.client.Id}"/>
+		<property name="clientSecret" value="${naver.client.secret}"/>
+		<property name="redirectURL" value="${naver.callbackURL}"/>
+	</bean>
+
 </beans>

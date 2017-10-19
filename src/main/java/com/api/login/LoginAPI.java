@@ -1,18 +1,33 @@
 package com.api.login;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpSession;
+
+import com.github.scribejava.core.model.OAuth2AccessToken;
+
 public interface LoginAPI{
 	
+	/**
+	 * session에 login 관련 담을 key
+	 */
 	public String LOGIN_SESSION_NAME="loginSession";
 	
 	/**
-	 * DefaultApi20 확장한 클래스를 반환한다.
+	 * 로그인 요청 URL을 반환한다.
+	 * @param session
 	 * @return
 	 */
-	public Class<?> getClazzInstance();
+	public String getAuthorizationUrl(HttpSession session);
 	
 	/**
-	 * 인증 처리후 실행할 메소드
+	 * accesstoken을 요청한다.
+	 * @param session
+	 * @param code
+	 * @param state
+	 * @return
+	 * @throws IOException
 	 */
-	public void callbackMethod();
+	public OAuth2AccessToken getAccessToken(HttpSession session, String code, String state) throws IOException;
 
 }

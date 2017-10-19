@@ -3,6 +3,7 @@ package com.api.login;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,8 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.api.login.naver.NaverLoginBO;
+import com.api.login.naver.LoginFactory;
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 
@@ -30,7 +32,7 @@ public class HomeController{
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	@Autowired
-	private NaverLoginBO naverLoginBO;
+	private LoginAPI naverLoginBO;
 	
 	/**
 	 * Simply selects the home view to render by returning its name.
@@ -86,5 +88,21 @@ public class HomeController{
     	//TODO : cookie에 token 담아야함
     	
         return "home";
+    }
+    
+    @RequestMapping("/checkSession")
+    @ResponseBody
+    public void checkSession(HttpServletRequest req, Model model) throws IOException {
+    	
+    	HttpSession session = req.getSession();
+    	
+    	Enumeration<String> names = session.getAttributeNames();
+    	
+    	System.out.println("session");
+    	while (names.hasMoreElements()) {
+			String name = (String) names.nextElement();
+			
+			System.out.println("name : "+name+", val : "+session.getAttribute(name));
+		}
     }
 }

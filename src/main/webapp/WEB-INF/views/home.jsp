@@ -12,6 +12,25 @@
 <P>  The time on the server is ${serverTime}. </P>
 <p>
 	<a href="<c:url value="/login"/>">로그인 페이지</a>
+	<a href="#none" id="checkSession">세션 확인</a>
 </p>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#checkSession').on('click',function(){
+			$.ajax({  
+				  type: 'POST',  
+				  url: "/checkSession",  
+				  data: null,  
+				  success: function(data){
+					  alert('success');
+				  },  
+				  error : function(e){
+					  console.warn("ERROR");
+				  }
+				});  
+		});
+	});
+</script>
 </body>
 </html>
