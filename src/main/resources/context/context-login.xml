@@ -13,12 +13,18 @@
 		<property name="location" value="classpath:/secret.properties"></property>
 	</bean>
 
-	
+	<bean id="naverAPI" class="com.api.login.naver.DefaultAPI">
+		<constructor-arg value="${v1.naver.accesstokenEndpoint}"/>
+		<constructor-arg value="${v1.naver.authorizationBaseURL}"/>
+	</bean>
+
+
 	<bean id="naverLogin" class="com.api.login.naver.LoginFactory">
 		<property name="serviceName" value="naver"/>
 		<property name="clientId" value="${naver.client.Id}"/>
 		<property name="clientSecret" value="${naver.client.secret}"/>
 		<property name="redirectURL" value="${naver.callbackURL}"/>
+		<property name="defaultAPI" ref="naverAPI"/>
 	</bean>
 
 </beans>
