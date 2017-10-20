@@ -81,7 +81,7 @@ public class LoginFactory implements LoginAPI{
 		String state = generateRandomString();
 		//생성한 난수 값을 session에 저장
 		setSession(session,state);
-
+		
 		//Scribe에서 제공하는 인증 URL 생성 기능을 이용하여 네아로 인증 URL 생성
 		OAuth20Service oauthService = new ServiceBuilder()
 				.apiKey(clientId)
