@@ -23,7 +23,7 @@
 				  url: "/checkSession",  
 				  data: null,  
 				  success: function(data){
-					  alert('success');
+					  alert('ajax 통신 성공');
 				  },  
 				  error : function(e){
 					  console.warn("ERROR");

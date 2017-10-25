@@ -1,17 +1,29 @@
-package com.api.login.naver;
+package com.api.login;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.UUID;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.api.login.LoginAPI;
 import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuthRequest;
+import com.github.scribejava.core.model.Response;
+import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
 public class LoginFactory implements LoginAPI{
 	
+	private static final Logger logger = LoggerFactory.getLogger(LoginFactory.class);
+	
+	//TODO : 어디서 host값을 받아올지 고민중
 	private String host = "http://localhost";
 	
 	private String serviceName;
@@ -19,7 +31,11 @@ public class LoginFactory implements LoginAPI{
 	private String clientSecret;
 	private String redirectURL;
 	
-	public DefaultAPI defaultAPI;
+	//request 주소를 담은 프로퍼티
+	@Resource(name="requestURL")
+	private Properties properties;
+	
+	public InnerAPI innerAPI = new InnerAPI();
 	
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
@@ -41,12 +57,16 @@ public class LoginFactory implements LoginAPI{
 		this.redirectURL = host+redirectURL;
 	}
 
-	public void setDefaultAPI(DefaultAPI defaultAPI) {
-		this.defaultAPI = defaultAPI;
-	}
-	
 	public String getServiceName(){
 		return this.serviceName;
+	}
+	
+	public void setAccesstokenEndpoint(String accessTokenEndPoint){
+		innerAPI.accessTokenEndPoint = accessTokenEndPoint;
+	}
+	
+	public void setAuthorizationBaseURL(String authorizationBaseUrl){
+		innerAPI.authorizationBaseUrl = authorizationBaseUrl;
 	}
 	
 	/**
@@ -83,13 +103,8 @@ public class LoginFactory implements LoginAPI{
 		setSession(session,state);
 		
 		//Scribe에서 제공하는 인증 URL 생성 기능을 이용하여 네아로 인증 URL 생성
-		OAuth20Service oauthService = new ServiceBuilder()
-				.apiKey(clientId)
-				.apiSecret(clientSecret)
-				.callback(redirectURL)
-				.state(state) //앞서 생성한 난수값을 인증 URL생성시 사용함
-				.build(defaultAPI);
-
+		OAuth20Service oauthService = getServiceBuilder(true).state(state).build(innerAPI);
+		
 		return oauthService.getAuthorizationUrl();
 	}
 
@@ -100,18 +115,71 @@ public class LoginFactory implements LoginAPI{
 		String sessionState = getSession(session);
 		if(sessionState !=null && sessionState.equals(state)){
 		
-			OAuth20Service oauthService = new ServiceBuilder()
-					.apiKey(clientId)
-					.apiSecret(clientSecret)
-					.callback(redirectURL)
-					.state(state)
-					.build(defaultAPI);
-					
+			OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 			
 			// Scribe에서 제공하는 AccessToken 획득 기능으로 네아로 Access Token을 획득 
 			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
 			return accessToken;
 		}
 		return null;
+	}
+	
+
+	@Override
+	public String requestAPI(String commandKey) {
+		return null;
+	}
+	
+	@Override
+	public String getUserProfile(OAuth2AccessToken oauthToken) throws IOException {
+		OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
+		
+		String requestKey = serviceName+LoginAPI.USER_PROFILE;
+		
+		boolean requestURL = properties.contains(requestKey);
+		
+		if(!requestURL){
+			logger.error("url이 존재하지 않음. properties key : "+requestKey);
+			return null;
+		}
+		
+		OAuthRequest request = new OAuthRequest(Verb.GET, properties.getProperty(requestKey), oauthService);
+		
+		oauthService.signRequest(oauthToken, request);
+		Response response = request.send();
+		
+		return response.getBody();
+	}
+	
+	private class InnerAPI extends DefaultApi20{
+		
+		public String accessTokenEndPoint; 
+		
+		public String authorizationBaseUrl;
+		
+		
+		@Override
+		public String getAccessTokenEndpoint() {
+			return accessTokenEndPoint;
+		}
+
+		@Override
+		protected String getAuthorizationBaseUrl() {
+			return authorizationBaseUrl;
+		}
+	}
+	
+	private ServiceBuilder getServiceBuilder(boolean addCallback){
+		
+		ServiceBuilder sb = new ServiceBuilder()
+				.apiKey(clientId)
+				.apiSecret(clientSecret);
+		
+		if(addCallback){
+			sb.callback(redirectURL);
+		}
+		
+		
+		return sb;
 	}
 }

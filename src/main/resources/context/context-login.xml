@@ -12,19 +12,23 @@
 	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location" value="classpath:/secret.properties"></property>
 	</bean>
-
-	<bean id="naverAPI" class="com.api.login.naver.DefaultAPI">
+	
+	<!-- 
+	<bean id="naverAPI" class="com.api.login.DefaultAPI">
 		<constructor-arg value="${v1.naver.accesstokenEndpoint}"/>
 		<constructor-arg value="${v1.naver.authorizationBaseURL}"/>
 	</bean>
+	 -->
 
 
-	<bean id="naverLogin" class="com.api.login.naver.LoginFactory">
+	<bean id="naverLogin" class="com.api.login.LoginFactory">
 		<property name="serviceName" value="naver"/>
 		<property name="clientId" value="${naver.client.Id}"/>
 		<property name="clientSecret" value="${naver.client.secret}"/>
 		<property name="redirectURL" value="${naver.callbackURL}"/>
-		<property name="defaultAPI" ref="naverAPI"/>
+		<property name="accesstokenEndpoint" value="${v1.naver.accesstokenEndpoint}"/>
+		<property name="authorizationBaseURL" value="${v1.naver.authorizationBaseURL}"/>
+		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
 	</bean>
 
 </beans>
