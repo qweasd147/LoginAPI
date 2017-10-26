@@ -66,8 +66,12 @@ public class LoginController{
     	
     	String token = oauthToken.getAccessToken();
     	
-    	naverLogin.getUserProfile(oauthToken);
+    	String profile = naverLogin.getUserProfile(oauthToken);
     	
+    	
+    	System.out.println("token : "+token);
+    	
+    	System.out.println("profile : "+profile);
     	//TODO : cookie에 token 담아야함
     	
         return "home";
