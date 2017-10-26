@@ -29,6 +29,9 @@ public class LoginController{
 	@Resource(name="naverLogin")
 	private LoginAPI naverLogin;
 	
+	
+	
+	
 	/**
 	 * 로그인 페이지로 이동 요청 바인딩
 	 * @return

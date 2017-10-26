@@ -2,6 +2,7 @@ package com.api.login;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Resource;
@@ -136,7 +137,7 @@ public class LoginFactory implements LoginAPI{
 		
 		String requestKey = serviceName+LoginAPI.USER_PROFILE;
 		
-		boolean requestURL = properties.contains(requestKey);
+		boolean requestURL = properties.containsKey(requestKey);
 		
 		if(!requestURL){
 			logger.error("url이 존재하지 않음. properties key : "+requestKey);
