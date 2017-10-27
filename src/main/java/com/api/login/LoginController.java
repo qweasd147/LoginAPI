@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -56,9 +57,10 @@ public class LoginController{
 	 * @param model
 	 * @return
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
     @RequestMapping("/api/authen/login/naver/callback")
-    public String callback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws IOException {
+    public String callback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws IOException, ParseException {
     	
     	HttpSession session = req.getSession();
     	

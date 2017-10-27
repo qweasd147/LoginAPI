@@ -2,16 +2,19 @@ package com.api.login;
 
 import java.io.IOException;
 import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.api.login.LoginAPI;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -31,6 +34,9 @@ public class LoginFactory implements LoginAPI{
 	private String clientId;
 	private String clientSecret;
 	private String redirectURL;
+	
+	private static final ObjectMapper JSON_OBJECT = new ObjectMapper();
+	
 	
 	//request 주소를 담은 프로퍼티
 	@Resource(name="requestURL")
@@ -132,7 +138,7 @@ public class LoginFactory implements LoginAPI{
 	}
 	
 	@Override
-	public String getUserProfile(OAuth2AccessToken oauthToken) throws IOException {
+	public String getUserProfile(OAuth2AccessToken oauthToken) throws IOException, ParseException {
 		OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 		
 		String requestKey = serviceName+LoginAPI.USER_PROFILE;
@@ -148,6 +154,16 @@ public class LoginFactory implements LoginAPI{
 		
 		oauthService.signRequest(oauthToken, request);
 		Response response = request.send();
+		
+		String strResult = response.getBody();
+		
+		
+		JSONParser jsonParser = new JSONParser();
+		
+		JSONObject result = (JSONObject)jsonParser.parse(strResult);
+		
+		
+		System.out.println("result : "+result);
 		
 		return response.getBody();
 	}

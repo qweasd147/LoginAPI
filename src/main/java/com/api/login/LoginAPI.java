@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpSession;
 
+import org.json.simple.parser.ParseException;
+
 import com.github.scribejava.core.model.OAuth2AccessToken;
 
 public interface LoginAPI{
@@ -35,8 +37,9 @@ public interface LoginAPI{
 	 * 유저 프로필 정보를 조회한다.
 	 * @return
 	 * @throws IOException 
+	 * @throws ParseException 
 	 */
-	public String getUserProfile(OAuth2AccessToken oauthToken) throws IOException;
+	public String getUserProfile(OAuth2AccessToken oauthToken) throws IOException, ParseException;
 	
 	/**
 	 * 서비스에서 제공하는 API를 요청한다.
