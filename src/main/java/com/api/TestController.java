@@ -1,4 +1,4 @@
-package com.api.login;
+package com.api;
 
 import java.text.DateFormat;
 import java.util.Date;

@@ -2,22 +2,27 @@ package com.api.login;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.json.simple.parser.ParseException;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.api.WebUtil;
 import com.api.login.LoginAPI;
-import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.api.login.LoginAPI.UserMethod;
+import com.api.login.service.LoginService;
 
 /**
  * Handles requests for the application home page.
@@ -30,8 +35,8 @@ public class LoginController{
 	@Resource(name="naverLogin")
 	private LoginAPI naverLogin;
 	
-	
-	
+	//@Autowired
+	LoginService loginService;
 	
 	/**
 	 * 로그인 페이지로 이동 요청 바인딩
@@ -44,7 +49,7 @@ public class LoginController{
 		
 		String naverAuthUrl = naverLogin.getAuthorizationUrl(session);
 		
-		model.addAttribute("url", naverAuthUrl);
+		model.addAttribute("naverURL", naverAuthUrl);
 		
         return "loginList";
     }
@@ -56,27 +61,82 @@ public class LoginController{
 	 * @param req
 	 * @param model
 	 * @return
-	 * @throws IOException
-	 * @throws ParseException 
+	 * @throws Exception 
 	 */
     @RequestMapping("/api/authen/login/naver/callback")
-    public String callback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws IOException, ParseException {
+    public String naverCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
     	
-    	HttpSession session = req.getSession();
-    	
-    	OAuth2AccessToken oauthToken = naverLogin.getAccessToken(session, code, state);
-    	
-    	String token = oauthToken.getAccessToken();
-    	
-    	String profile = naverLogin.getUserProfile(oauthToken);
-    	
-    	
-    	System.out.println("token : "+token);
-    	
-    	System.out.println("profile : "+profile);
-    	//TODO : cookie에 token 담아야함
-    	
+		naverLogin.setUserMethod(new UserMethod() {
+			@Override
+			public UserVo getUserVo(JSONObject profile) {
+				
+				String result = (String) profile.get("message");
+				
+				if(!"success".equals(result)){
+					
+					logger.error("통신 실패!");
+					
+					return null;
+				};
+				
+				UserVo userVo = new UserVo();
+				
+				JSONObject respJSON = (JSONObject) profile.get("response");
+				
+				String id = (String) respJSON.get("id");
+				String name = (String) respJSON.get("name");
+				String nickName = (String) respJSON.get("nickname");
+				String email = (String) respJSON.get("email");
+				
+				userVo.setId(id)
+						.setName(name)
+						.setNickName(nickName)
+						.setEmail(email)
+						.setServiceName("naver");
+					
+				return userVo;
+			}
+		});
+		
+		naverLogin.login(req, code, state);
+		
         return "home";
+    }
+    
+    @RequestMapping("/logOut")
+    @ResponseBody
+    public Map<String, String> logOut(HttpServletRequest req, Model model) throws IOException {
+    	
+    	UserVo userVo = (UserVo) WebUtil.getSession(LoginAPI.LOGIN_SESSION_KEY);
+    	
+    	Map<String, String> map = new HashMap<String, String>();
+    	
+    	if(userVo == null) {
+    		
+    		logger.debug("잘못된 접근. 로그인 상태가 아님");
+    		
+    		map.put("result", "로그인 된 상태가 아님");
+    		
+    		return map;
+    	}
+    	
+    	LoginAPI loginAPI = null;
+    	
+    	loginAPI = (LoginAPI) WebUtil.getBean(req, userVo.getServiceName()+"Login");
+    	
+    	if(loginAPI == null) {
+    		logger.debug("logout 의존주입 실패!!!");
+    	}
+    	
+    	boolean logOutResult = loginAPI.logOut();
+    	
+    	if(logOutResult) {
+    		map.put("result", "로그아웃 처리됨");
+    	}else {
+    		map.put("result", "시스템 오류");
+    	}
+    	
+    	return map;
     }
     
     @RequestMapping("/checkSession")

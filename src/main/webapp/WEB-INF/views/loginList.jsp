@@ -5,6 +5,6 @@
 	<title>naver</title>
 </head>
 <body>
-	<div style="text-align:center"><a href="${url}">NaverIdLogin</a></div>
+	<div style="text-align:center"><a href="${naverURL}">NaverIdLogin</a></div>
 </body>
 </html>

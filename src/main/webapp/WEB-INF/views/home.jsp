@@ -13,6 +13,7 @@
 <p>
 	<a href="<c:url value="/login"/>">로그인 페이지</a>
 	<a href="#none" id="checkSession">세션 확인</a>
+	<a href="#none" id="logOut">로그아웃</a>
 </p>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script type="text/javascript">
@@ -21,6 +22,20 @@
 			$.ajax({  
 				  type: 'POST',  
 				  url: "/checkSession",  
+				  data: null,  
+				  success: function(data){
+					  alert('ajax 통신 성공');
+				  },  
+				  error : function(e){
+					  console.warn("ERROR");
+				  }
+				});  
+		});
+		
+		$('#logOut').on('click',function(){
+			$.ajax({  
+				  type: 'POST',  
+				  url: "/logOut",  
 				  data: null,  
 				  success: function(data){
 					  alert('ajax 통신 성공');
