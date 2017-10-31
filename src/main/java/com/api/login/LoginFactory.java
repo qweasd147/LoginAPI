@@ -1,6 +1,7 @@
 package com.api.login;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class LoginFactory implements LoginAPI{
 	public InnerAPI innerAPI = new InnerAPI();
 	
 	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
+		this.serviceName = "."+serviceName;
 	}
 
 	public void setHost(String host) {
@@ -98,7 +99,7 @@ public class LoginFactory implements LoginAPI{
 	 * @param session
 	 * @param state
 	 */
-	private void setSession(HttpSession session,String state){
+	private void setSessionState(HttpSession session,String state){
 		session.setAttribute(LoginAPI.LOGIN_SESSION_STATE_KEY, state);		
 	}
 	
@@ -107,7 +108,7 @@ public class LoginFactory implements LoginAPI{
 	 * @param session
 	 * @return
 	 */
-	private String getSession(HttpSession session){
+	private String getSessionState(HttpSession session){
 		return (String) session.getAttribute(LoginAPI.LOGIN_SESSION_STATE_KEY);
 	}
 
@@ -116,7 +117,7 @@ public class LoginFactory implements LoginAPI{
 		// 세션 유효성 검증을 위하여 난수를 생성
 		String state = generateRandomString();
 		//생성한 난수 값을 session에 저장
-		setSession(session,state);
+		setSessionState(session,state);
 		
 		//Scribe에서 제공하는 인증 URL 생성
 		OAuth20Service oauthService = getServiceBuilder(true).state(state).build(innerAPI);
@@ -125,10 +126,10 @@ public class LoginFactory implements LoginAPI{
 	}
 
 	@Override
-	public OAuth2AccessToken getAccessToken(HttpSession session, String code, String state) throws IOException {
+	public OAuth2AccessToken getOAuthAccessToken(HttpSession session, String code, String state) throws IOException {
 		
 		//Callback으로 전달받은 세선검증용 난수값과 세션에 저장되어있는 값이 일치하는지 확인
-		String sessionState = getSession(session);
+		String sessionState = getSessionState(session);
 		if(sessionState !=null && sessionState.equals(state)){
 		
 			OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
@@ -141,8 +142,76 @@ public class LoginFactory implements LoginAPI{
 	
 	//TODO : token으로 제공되는 API요청 메소드. 구현예정
 	@Override
-	public String requestAPI(String commandKey) {
-		return null;
+	public String requestAPI(Verb method, String commandKey, Map<String, String> params) throws IOException {
+		
+		String accessToken = getAccessTokenFromSession();
+		
+		OAuth20Service service = getServiceBuilder(false).build(innerAPI);
+		
+		commandKey = serviceName+commandKey;
+		
+		boolean hasServiceURL = properties.contains(commandKey);
+		
+		//해당 키값이 프로퍼티에 없을 때
+		if(!hasServiceURL){
+			logger.warn("해당 키가 프로퍼티에 존재하지 않음. key : "+commandKey);
+			
+			return null;
+		};
+		
+		String serviceURL = properties.getProperty(commandKey);
+		
+		OAuthRequest oauthReq = new OAuthRequest(method, serviceURL, service);
+		
+		
+		
+		if(params != null){
+			
+			Iterator<String> paramsKeys = params.keySet().iterator();
+			
+			//TODO : access key 담아야 하는데 무슨 키로 담아야 할지 모르겠음. 서비스 마다 다를수도 있고, reference 보고 판단하기.
+			switch(method){
+				case GET :
+					while(paramsKeys.hasNext()){
+						String key = paramsKeys.next();
+						
+						oauthReq.addQuerystringParameter(key, params.get(key));
+					}
+					break;
+				case POST :
+					while(paramsKeys.hasNext()){
+						String key = paramsKeys.next();
+						
+						oauthReq.addBodyParameter(key, params.get(key));
+					}
+					break;
+			default:
+				logger.warn("get, post를 제외한 다른 메소드는 준비중");
+				break; 
+			}
+		}
+		
+		
+		
+		Response modelResp = oauthReq.send();
+		
+		String result = modelResp.getBody();
+		
+		logger.debug("result 결과 : "+result);
+		
+		return result;
+	}
+	
+	@Override
+	public String getAccessTokenFromSession() {
+		
+		UserVo userVo = (UserVo) WebUtil.getSession(LoginAPI.LOGIN_SESSION_KEY);
+		
+		if(userVo == null)	return null;
+		
+		String accessToken = userVo.getAccessToken();
+		
+		return accessToken;
 	}
 	
 	@Override
@@ -183,7 +252,7 @@ public class LoginFactory implements LoginAPI{
 		
 		HttpSession session = req.getSession();
 		
-		OAuth2AccessToken oauthToken = getAccessToken(session, code, state);
+		OAuth2AccessToken oauthToken = getOAuthAccessToken(session, code, state);
     	
     	String token = oauthToken.getAccessToken();
     	

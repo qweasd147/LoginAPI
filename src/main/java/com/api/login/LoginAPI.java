@@ -1,7 +1,6 @@
 package com.api.login;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.Verb;
 
 public interface LoginAPI{
 	
@@ -19,7 +19,7 @@ public interface LoginAPI{
 	 */
 	public String LOGIN_SESSION_STATE_KEY="LoginState";
 	public String LOGIN_SESSION_KEY="LOGIN_SESSION_INFO";
-	public String USER_PROFILE=".v1.user.profile";
+	public String USER_PROFILE="v1.user.profile";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
@@ -35,17 +35,23 @@ public interface LoginAPI{
 	public String getAuthorizationUrl(HttpSession session);
 	
 	/**
-	 * accesstoken을 요청한다.
+	 * 외부 제공지에서 accesstoken을 요청한다.
 	 * @param session
 	 * @param code
 	 * @param state
 	 * @return
 	 * @throws IOException
 	 */
-	public OAuth2AccessToken getAccessToken(HttpSession session, String code, String state) throws IOException;
+	public OAuth2AccessToken getOAuthAccessToken(HttpSession session, String code, String state) throws IOException;
 	
 	/**
-	 * 서비스 제공하는 쪽에서의 유저 프로필 정보를 조회한다.
+	 * 세션에서 accessToken을 가져온다.
+	 * @return
+	 */
+	public String getAccessTokenFromSession();
+	
+	/**
+	 * 서비스 제공하는 쪽에서의 유저 프로필 정보를 조회하여 UserVo로 넘겨준다.
 	 * @return
 	 * @throws IOException 
 	 * @throws ParseException 
@@ -54,10 +60,12 @@ public interface LoginAPI{
 	
 	/**
 	 * 서비스에서 제공하는 API를 요청한다.
+	 * @param method get, post 등
 	 * @param commandKey
 	 * @return
+	 * @throws IOException 
 	 */
-	public String requestAPI(String commandKey);
+	public String requestAPI(Verb method, String commandKey, Map<String, String> params) throws IOException;
 	
 	/**
 	 * 로그인 처리를 수행한다.
