@@ -21,6 +21,7 @@ import com.api.login.LoginAPI;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuthConstants;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
@@ -50,7 +51,7 @@ public class LoginFactory implements LoginAPI{
 	public InnerAPI innerAPI = new InnerAPI();
 	
 	public void setServiceName(String serviceName) {
-		this.serviceName = "."+serviceName;
+		this.serviceName = serviceName;
 	}
 
 	public void setHost(String host) {
@@ -140,7 +141,6 @@ public class LoginFactory implements LoginAPI{
 		return null;
 	}
 	
-	//TODO : token으로 제공되는 API요청 메소드. 구현예정
 	@Override
 	public String requestAPI(Verb method, String commandKey, Map<String, String> params) throws IOException {
 		
@@ -148,28 +148,28 @@ public class LoginFactory implements LoginAPI{
 		
 		OAuth20Service service = getServiceBuilder(false).build(innerAPI);
 		
-		commandKey = serviceName+commandKey;
+		String propertiesKey = getPropertiesKey(commandKey);
 		
-		boolean hasServiceURL = properties.contains(commandKey);
+		boolean hasServiceURL = properties.contains(propertiesKey);
 		
 		//해당 키값이 프로퍼티에 없을 때
 		if(!hasServiceURL){
-			logger.warn("해당 키가 프로퍼티에 존재하지 않음. key : "+commandKey);
+			logger.warn("해당 키가 프로퍼티에 존재하지 않음. key : "+propertiesKey);
 			
 			return null;
 		};
 		
-		String serviceURL = properties.getProperty(commandKey);
+		String serviceURL = properties.getProperty(propertiesKey);
 		
 		OAuthRequest oauthReq = new OAuthRequest(method, serviceURL, service);
 		
 		
+		//token을 부여한다.
+		oauthReq.addQuerystringParameter(OAuthConstants.ACCESS_TOKEN, accessToken);
 		
 		if(params != null){
-			
 			Iterator<String> paramsKeys = params.keySet().iterator();
 			
-			//TODO : access key 담아야 하는데 무슨 키로 담아야 할지 모르겠음. 서비스 마다 다를수도 있고, reference 보고 판단하기.
 			switch(method){
 				case GET :
 					while(paramsKeys.hasNext()){
@@ -190,8 +190,6 @@ public class LoginFactory implements LoginAPI{
 				break; 
 			}
 		}
-		
-		
 		
 		Response modelResp = oauthReq.send();
 		
@@ -218,7 +216,7 @@ public class LoginFactory implements LoginAPI{
 	public UserVo getUserProfile(OAuth2AccessToken oauthToken) throws IOException, ParseException {
 		OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 		
-		String requestKey = serviceName+LoginAPI.USER_PROFILE;
+		String requestKey = getPropertiesKey(LoginAPI.USER_PROFILE);;
 		
 		boolean requestURL = properties.containsKey(requestKey);
 		
@@ -227,9 +225,11 @@ public class LoginFactory implements LoginAPI{
 			return null;
 		}
 		
+		//TODO : requestAPI 완성되면 합칠 예정
 		OAuthRequest request = new OAuthRequest(Verb.GET, properties.getProperty(requestKey), oauthService);
 		
 		oauthService.signRequest(oauthToken, request);
+		
 		Response response = request.send();
 		
 		String strResult = response.getBody();
@@ -284,9 +284,23 @@ public class LoginFactory implements LoginAPI{
 		//TODO : 할꺼 예정
 		//로그아웃 API는 별도로 존재하지 않다고 함. 이유는 이용자 보호 정책이라 적혀 있음.
 		//일단 내 어플리케이션에 등록된 세션 정보를 비우고, 차후 access token을 반납 하는 것으로 대체 예정
+		//naver에선 반납 시, accesstoken이 유효한지 먼저 검사 해보라 하는데 유효 여부가 중요 한가 싶음...
 		
-		WebUtil.removeSessionAttribute(LoginAPI.LOGIN_SESSION_KEY);
+		String result = null;
 		
+		String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
+		
+		try {
+			result = requestAPI(Verb.GET, requestKey, null);
+			
+			logger.info("로그아웃 성공. msg : "+result);
+		} catch (IOException e) {
+			logger.warn("logout 요청에 실패!");
+		}finally {
+			//api를 통해 logout 성공 여부와 상관없이 session에 로그인 정보를 지운다.
+			//설사 실패 하였어도, token 사용 및 접근 불가
+			WebUtil.removeSessionAttribute(LoginAPI.LOGIN_SESSION_KEY);
+		}
 		
 		return true;
 	}
@@ -326,5 +340,9 @@ public class LoginFactory implements LoginAPI{
 		}
 		
 		return sb;
+	}
+	
+	private String getPropertiesKey(String commandKey){
+		return getServiceName()+"."+commandKey;
 	}
 }

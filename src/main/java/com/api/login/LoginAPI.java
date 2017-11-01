@@ -20,6 +20,7 @@ public interface LoginAPI{
 	public String LOGIN_SESSION_STATE_KEY="LoginState";
 	public String LOGIN_SESSION_KEY="LOGIN_SESSION_INFO";
 	public String USER_PROFILE="v1.user.profile";
+	public String LOGOUT_KEY="v1.user.profile";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
