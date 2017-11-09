@@ -1,8 +1,10 @@
 package com.api.login;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -13,6 +15,8 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,19 +35,21 @@ import com.api.login.service.LoginService;
 public class LoginController{
 	
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
-	
+
+
 	@Resource(name="naverLogin")
 	private LoginAPI naverLogin;
 	
 	//@Autowired
 	LoginService loginService;
 	
+	
 	/**
 	 * 로그인 페이지로 이동 요청 바인딩
 	 * @return
 	 */
 	@RequestMapping("/login")
-    public String naverLogin(HttpServletRequest req, Model model) {
+    public String loginList(HttpServletRequest req, Model model) {
 		
 		HttpSession session = req.getSession();
 		
@@ -55,7 +61,9 @@ public class LoginController{
     }
  
 	/**
+	 * naver login 처리를 진행한다.
 	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
+	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
 	 * @param code
 	 * @param state
 	 * @param req

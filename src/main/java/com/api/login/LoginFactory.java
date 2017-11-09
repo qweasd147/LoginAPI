@@ -148,18 +148,16 @@ public class LoginFactory implements LoginAPI{
 		
 		OAuth20Service service = getServiceBuilder(false).build(innerAPI);
 		
-		String propertiesKey = getPropertiesKey(commandKey);
-		
-		boolean hasServiceURL = properties.contains(propertiesKey);
+		boolean hasServiceURL = properties.contains(commandKey);
 		
 		//해당 키값이 프로퍼티에 없을 때
 		if(!hasServiceURL){
-			logger.warn("해당 키가 프로퍼티에 존재하지 않음. key : "+propertiesKey);
+			logger.warn("해당 키가 프로퍼티에 존재하지 않음. key : "+commandKey);
 			
 			return null;
 		};
 		
-		String serviceURL = properties.getProperty(propertiesKey);
+		String serviceURL = properties.getProperty(commandKey);
 		
 		OAuthRequest oauthReq = new OAuthRequest(method, serviceURL, service);
 		
@@ -216,7 +214,7 @@ public class LoginFactory implements LoginAPI{
 	public UserVo getUserProfile(OAuth2AccessToken oauthToken) throws IOException, ParseException {
 		OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 		
-		String requestKey = getPropertiesKey(LoginAPI.USER_PROFILE);;
+		String requestKey = getPropertiesKey(LoginAPI.USER_PROFILE);
 		
 		boolean requestURL = properties.containsKey(requestKey);
 		
@@ -273,7 +271,7 @@ public class LoginFactory implements LoginAPI{
     	*/
     	WebUtil.setSession(req, LoginAPI.LOGIN_SESSION_KEY, userVo);
     	
-    	logger.info("User Vo :"+userVo);
+    	logger.info("login success. User Vo :"+userVo);
     	
 		return true;
 	}
@@ -281,17 +279,17 @@ public class LoginFactory implements LoginAPI{
 	@Override
 	public boolean logOut() {
 		
-		//TODO : 할꺼 예정
-		//로그아웃 API는 별도로 존재하지 않다고 함. 이유는 이용자 보호 정책이라 적혀 있음.
-		//일단 내 어플리케이션에 등록된 세션 정보를 비우고, 차후 access token을 반납 하는 것으로 대체 예정
+		//naver 기준 로그아웃 API는 별도로 존재하지 않다고 함. 이유는 이용자 보호 정책이라 적혀 있음.
+		//권장 방법은 그냥 access token을 반납(삭제) 하라고 적혀있음
 		//naver에선 반납 시, accesstoken이 유효한지 먼저 검사 해보라 하는데 유효 여부가 중요 한가 싶음...
 		
 		String result = null;
 		
-		String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
-		
 		try {
-			result = requestAPI(Verb.GET, requestKey, null);
+			
+			String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
+			
+			result = requestAPI(Verb.GET,requestKey , null);
 			
 			logger.info("로그아웃 성공. msg : "+result);
 		} catch (IOException e) {
@@ -303,6 +301,13 @@ public class LoginFactory implements LoginAPI{
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public boolean accountVerify() {
+		//TODO : 세션에 로그인 정보가 있는지, access token이 유효한지.....
+		//세션 판별 api 찾고있는중
+		return false;
 	}
 	
 	/**

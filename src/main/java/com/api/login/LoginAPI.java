@@ -20,7 +20,7 @@ public interface LoginAPI{
 	public String LOGIN_SESSION_STATE_KEY="LoginState";
 	public String LOGIN_SESSION_KEY="LOGIN_SESSION_INFO";
 	public String USER_PROFILE="v1.user.profile";
-	public String LOGOUT_KEY="v1.user.profile";
+	public String LOGOUT_KEY="v1.accesstokenDelete";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
@@ -82,5 +82,11 @@ public interface LoginAPI{
 	 * @return
 	 */
 	public boolean logOut();
+	
+	/**
+	 * 사용자 정보가 유효한지 판별한다(세션, token 유효성 검사).
+	 * @return
+	 */
+	public boolean accountVerify();
 
 }
