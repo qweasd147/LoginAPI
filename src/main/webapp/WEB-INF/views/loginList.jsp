@@ -6,5 +6,6 @@
 </head>
 <body>
 	<div style="text-align:center"><a href="${naverURL}">NaverIdLogin</a></div>
+	<div style="text-align:center"><a href="${kakaoURL}">KakaoIdLogin</a></div>
 </body>
 </html>

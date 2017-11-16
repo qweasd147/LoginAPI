@@ -1,6 +1,7 @@
 package com.api.login;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +41,9 @@ public class LoginFactory implements LoginAPI{
 	private String redirectURL;
 	
 	private static final JSONParser JSON_PARSER = new JSONParser();
+	
+	private static final String CLIENT_ID = "client_id";
+	private static final String CLIENT_SECRET = "client_secret";
 	
 	private LoginAPI.UserMethod userMethod;
 	
@@ -136,6 +140,7 @@ public class LoginFactory implements LoginAPI{
 			OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 			// Scribe에서 제공하는 AccessToken 획득 기능으로 네아로 Access Token을 획득 
 			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
+			
 			return accessToken;
 		}
 		return null;
@@ -148,7 +153,7 @@ public class LoginFactory implements LoginAPI{
 		
 		OAuth20Service service = getServiceBuilder(false).build(innerAPI);
 		
-		boolean hasServiceURL = properties.contains(commandKey);
+		boolean hasServiceURL = properties.containsKey(commandKey);
 		
 		//해당 키값이 프로퍼티에 없을 때
 		if(!hasServiceURL){
@@ -160,7 +165,6 @@ public class LoginFactory implements LoginAPI{
 		String serviceURL = properties.getProperty(commandKey);
 		
 		OAuthRequest oauthReq = new OAuthRequest(method, serviceURL, service);
-		
 		
 		//token을 부여한다.
 		oauthReq.addQuerystringParameter(OAuthConstants.ACCESS_TOKEN, accessToken);
@@ -289,7 +293,12 @@ public class LoginFactory implements LoginAPI{
 			
 			String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
 			
-			result = requestAPI(Verb.GET,requestKey , null);
+			Map<String, String> map = new HashMap<String, String>();
+			
+			map.put(CLIENT_ID, clientId);
+			map.put(CLIENT_SECRET, clientSecret);
+			
+			result = requestAPI(Verb.GET,requestKey , map);
 			
 			logger.info("로그아웃 성공. msg : "+result);
 		} catch (IOException e) {
@@ -336,9 +345,10 @@ public class LoginFactory implements LoginAPI{
 	
 	private ServiceBuilder getServiceBuilder(boolean addCallback){
 		
-		ServiceBuilder sb = new ServiceBuilder()
-				.apiKey(clientId)
-				.apiSecret(clientSecret);
+		ServiceBuilder sb = new ServiceBuilder().apiKey(clientId);
+		
+		if(clientSecret != null && !clientSecret.isEmpty())
+			sb.apiSecret(clientSecret);
 		
 		if(addCallback){
 			sb.callback(redirectURL);

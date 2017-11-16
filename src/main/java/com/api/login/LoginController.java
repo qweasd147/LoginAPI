@@ -40,9 +40,15 @@ public class LoginController{
 	@Resource(name="naverLogin")
 	private LoginAPI naverLogin;
 	
+	@Resource(name="kakaoLogin")
+	private LoginAPI kakaoLogin;
+	
 	//@Autowired
 	LoginService loginService;
 	
+	
+	@Autowired
+	private List<? extends LoginFactory> list;
 	
 	/**
 	 * 로그인 페이지로 이동 요청 바인딩
@@ -53,9 +59,22 @@ public class LoginController{
 		
 		HttpSession session = req.getSession();
 		
-		String naverAuthUrl = naverLogin.getAuthorizationUrl(session);
+		if(list != null){
+			for(int i=0;i<list.size();i++){
+				LoginFactory loginFactoryClazz = list.get(i);
+				
+				logger.info("load login factory. "+loginFactoryClazz.getServiceName());
+				
+				String authURL = loginFactoryClazz.getAuthorizationUrl(session);
+				
+				String serviceUrlName = loginFactoryClazz.getServiceName()+"URL";
+				
+				model.addAttribute(serviceUrlName, authURL);
+			}
+		}else{
+			logger.warn("not exist LoginFactory instance");
+		}
 		
-		model.addAttribute("naverURL", naverAuthUrl);
 		
         return "loginList";
     }
@@ -107,6 +126,39 @@ public class LoginController{
 		});
 		
 		naverLogin.login(req, code, state);
+		
+        return "home";
+    }
+    
+    /**
+	 * naver login 처리를 진행한다.
+	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
+	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
+	 * @param code
+	 * @param state
+	 * @param req
+	 * @param model
+	 * @return
+	 * @throws Exception 
+	 */
+    @RequestMapping("/api/authen/login/kakao/callback")
+    public String kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
+    	
+    	System.out.println("code : "+code);
+    	System.out.println("state : "+state);
+    	
+    	kakaoLogin.setUserMethod(new UserMethod() {
+			@Override
+			public UserVo getUserVo(JSONObject profile) {
+				
+				System.out.println("profile");
+				System.out.println(profile);
+					
+				return null;
+			}
+		});
+		
+    	kakaoLogin.login(req, code, state);
 		
         return "home";
     }
