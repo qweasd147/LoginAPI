@@ -31,9 +31,10 @@ public interface LoginAPI{
 	/**
 	 * 로그인 요청 URL을 반환한다.
 	 * @param session
+	 * @param state
 	 * @return
 	 */
-	public String getAuthorizationUrl(HttpSession session);
+	public String getAuthorizationUrl(HttpSession session, String state);
 	
 	/**
 	 * 외부 제공지에서 accesstoken을 요청한다.

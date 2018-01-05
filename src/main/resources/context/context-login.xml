@@ -34,6 +34,7 @@
 	<bean id="kakaoLogin" class="com.api.login.LoginFactory">
 		<property name="serviceName" value="kakao"/>
 		<property name="clientId" value="${kakao.client.Id}"/>
+		<property name="clientSecret" value="${kakao.client.secret}"/>
 		<property name="redirectURL" value="${kakao.callbackURL}"/>
 		<property name="accesstokenEndpoint" value="${v1.kakao.accesstokenEndpoint}"/>
 		<property name="authorizationBaseURL" value="${v1.kakao.authorizationBaseURL}"/>

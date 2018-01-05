@@ -100,15 +100,6 @@ public class LoginFactory implements LoginAPI{
 	}
 
 	/**
-	 * session에서 login관련 상태값을 넣는다.
-	 * @param session
-	 * @param state
-	 */
-	private void setSessionState(HttpSession session,String state){
-		session.setAttribute(LoginAPI.LOGIN_SESSION_STATE_KEY, state);		
-	}
-	
-	/**
 	 * 세션에 담긴 값을 넣는다.
 	 * @param session
 	 * @return
@@ -118,11 +109,7 @@ public class LoginFactory implements LoginAPI{
 	}
 
 	@Override
-	public String getAuthorizationUrl(HttpSession session) {
-		// 세션 유효성 검증을 위하여 난수를 생성
-		String state = generateRandomString();
-		//생성한 난수 값을 session에 저장
-		setSessionState(session,state);
+	public String getAuthorizationUrl(HttpSession session, String state) {
 		
 		//Scribe에서 제공하는 인증 URL 생성
 		OAuth20Service oauthService = getServiceBuilder(true).state(state).build(innerAPI);
@@ -135,12 +122,12 @@ public class LoginFactory implements LoginAPI{
 		
 		//Callback으로 전달받은 세선검증용 난수값과 세션에 저장되어있는 값이 일치하는지 확인
 		String sessionState = getSessionState(session);
-		if(sessionState !=null && sessionState.equals(state)){
 		
+		if(sessionState !=null && sessionState.equals(state)){
 			OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 			// Scribe에서 제공하는 AccessToken 획득 기능으로 네아로 Access Token을 획득 
-			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
 			
+			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
 			return accessToken;
 		}
 		return null;
@@ -256,6 +243,12 @@ public class LoginFactory implements LoginAPI{
 		
 		OAuth2AccessToken oauthToken = getOAuthAccessToken(session, code, state);
     	
+		if(oauthToken == null) {
+			logger.error("로그인 잘못됨! state값과 session에 저장된 state 값이 다름");
+			
+			return false;
+		}
+		
     	String token = oauthToken.getAccessToken();
     	
     	UserVo userVo = getUserProfile(oauthToken);
@@ -287,6 +280,8 @@ public class LoginFactory implements LoginAPI{
 		//권장 방법은 그냥 access token을 반납(삭제) 하라고 적혀있음
 		//naver에선 반납 시, accesstoken이 유효한지 먼저 검사 해보라 하는데 유효 여부가 중요 한가 싶음...
 		
+		//추가 내용. 카카오에는 API 있음... 
+		//파라미터 다름... method 다름.... 환장하겠네
 		String result = null;
 		
 		try {

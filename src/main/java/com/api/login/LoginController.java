@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -15,8 +16,6 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,12 +59,20 @@ public class LoginController{
 		HttpSession session = req.getSession();
 		
 		if(list != null){
+			
+			//1. 세션 유효성 검증을 위하여 난수를 생성
+			//2. 생성한 난수 값을 session에 저장
+			//목적 : 현재 프로젝트에 있는 login list를 거쳐 가야만 로그인 처리 가능
+			
+			String state = UUID.randomUUID().toString();
+			WebUtil.setSession(LoginAPI.LOGIN_SESSION_STATE_KEY, state);
+			
 			for(int i=0;i<list.size();i++){
 				LoginFactory loginFactoryClazz = list.get(i);
 				
 				logger.info("load login factory. "+loginFactoryClazz.getServiceName());
 				
-				String authURL = loginFactoryClazz.getAuthorizationUrl(session);
+				String authURL = loginFactoryClazz.getAuthorizationUrl(session, state);
 				
 				String serviceUrlName = loginFactoryClazz.getServiceName()+"URL";
 				
@@ -120,7 +127,7 @@ public class LoginController{
 						.setNickName(nickName)
 						.setEmail(email)
 						.setServiceName("naver");
-					
+				
 				return userVo;
 			}
 		});
@@ -144,17 +151,35 @@ public class LoginController{
     @RequestMapping("/api/authen/login/kakao/callback")
     public String kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
     	
-    	System.out.println("code : "+code);
-    	System.out.println("state : "+state);
-    	
     	kakaoLogin.setUserMethod(new UserMethod() {
 			@Override
 			public UserVo getUserVo(JSONObject profile) {
 				
-				System.out.println("profile");
-				System.out.println(profile);
+				UserVo userVo = new UserVo();
+				JSONObject properties = null;
+				
+				if(profile == null || !profile.containsKey("properties")) {
+					logger.error("통신 실패!");
 					
-				return null;
+					return null;
+				}
+				
+				properties = (JSONObject) profile.get("properties");
+				
+				
+				String id =profile.get("id").toString();	//long 형태로 반환된걸 String으로 변환
+				String name = (String) properties.get("nickname");
+				String nickName = (String) properties.get("nickname");
+				String email = (String) profile.get("kaccount_email");
+				
+				
+				userVo.setId(id)
+					.setName(name)
+					.setNickName(nickName)
+					.setEmail(email)
+					.setServiceName("kakao");
+				
+				return userVo;
 			}
 		});
 		
