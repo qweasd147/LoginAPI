@@ -2,7 +2,7 @@ package com.api.login.service;
 
 import java.util.Map;
 
-import com.api.login.UserVo;
+import com.api.model.UserVo;
 
 public interface LoginService {
 	/**

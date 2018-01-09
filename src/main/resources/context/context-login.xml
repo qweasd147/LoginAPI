@@ -21,7 +21,7 @@
 	 -->
 
 
-	<bean id="naverLogin" class="com.api.login.LoginFactory">
+	<bean id="naverLogin" class="com.api.login.serviceBuild.LoginFactory">
 		<property name="serviceName" value="naver"/>
 		<property name="clientId" value="${naver.client.Id}"/>
 		<property name="clientSecret" value="${naver.client.secret}"/>
@@ -31,7 +31,7 @@
 		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
 	</bean>
 	
-	<bean id="kakaoLogin" class="com.api.login.LoginFactory">
+	<bean id="kakaoLogin" class="com.api.login.serviceBuild.LoginFactory">
 		<property name="serviceName" value="kakao"/>
 		<property name="clientId" value="${kakao.client.Id}"/>
 		<property name="clientSecret" value="${kakao.client.secret}"/>

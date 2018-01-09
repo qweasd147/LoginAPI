@@ -1,4 +1,4 @@
-package com.api.login;
+package com.api.login.serviceBuild;
 
 import java.io.IOException;
 import java.util.Map;
@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.api.model.UserVo;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.Verb;
 
@@ -89,5 +90,11 @@ public interface LoginAPI{
 	 * @return
 	 */
 	public boolean accountVerify();
+	
+	/**
+	 * 현재 인스턴스의 서비스명(naver, kakao 등)을 가져온다.
+	 * @return
+	 */
+	public String getServiceName();
 
 }
