@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -290,6 +289,7 @@ public class LoginFactory implements LoginAPI{
 			
 			map.put(OAuthConstants.CLIENT_ID, clientId);
 			map.put(OAuthConstants.CLIENT_SECRET, clientSecret);
+			map.put("token", getAccessTokenFromSession());
 			
 			result = requestAPI(Verb.GET,requestKey , map);
 			

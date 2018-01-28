@@ -2,10 +2,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-	<title>naver</title>
+	<title>LoginList</title>
 </head>
 <body>
 	<div style="text-align:center"><a href="${naverURL}">NaverIdLogin</a></div>
 	<div style="text-align:center"><a href="${kakaoURL}">KakaoIdLogin</a></div>
+	<div style="text-align:center"><a href="${googleURL}">GoogleIdLogin</a></div>
 </body>
 </html>

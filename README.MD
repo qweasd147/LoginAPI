@@ -2,7 +2,7 @@
 
 각 SNS 등에서 제공하는 소셜 로그인 REST API를 이용하여 공통된 로그인 기능을 제공하는 소스 프로그램.
 
-각 REST API는 OAuth 2.0에 맞게 구현 되어야 하고, 그에 따른 REST API 패턴을 공통화 하여 다른 SNS가 추가되어도 소스 상 변경 사항을 최소화 하는게 목적.
+각 인증 관련 REST API 서비스는 OAuth 2.0에 맞게 구현 되어야 하고, 그에 따른 REST API 패턴을 공통화 하여 다른 SNS가 추가되어도 소스 상 변경 사항을 최소화 하는게 목적.
 
 ### * 참고 OAuth 2.0) https://tools.ietf.org/html/rfc6749#section-4.1.3
 
@@ -91,7 +91,9 @@
 	
 	뭐 여기까지는 큰 차이점은 없지만 넘겨주는 Method(get, post 등)이랑 파라미터가 다름....
 	
-	위 OAuth 2.0 문서 보니깐 에서도 토큰 반납하는 건 따로 안나와 있음
+	google은 넘겨줄 파라미터 key값도 다름...
+	
+	위 OAuth 2.0 문서(https://tools.ietf.org/html/rfc6749) 보니깐 여기에서도 토큰 반납하는 건 따로 안나와 있음
 
 ### 5.2
 	API 요청 시 scribejava 외부 라이브러리를 쓰는데 이게 디버깅이 너무 힘듦.
@@ -102,3 +104,6 @@
 
 ### 6. 참고한 것들
 카카오 참고 : https://devtalk.kakao.com/t/java-rest-api/14543
+
+구글 auth Doc : https://developers.google.com/identity/protocols/OAuth2WebServer
+구글 auth 한글 : https:https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps?hl=ko

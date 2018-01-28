@@ -11,7 +11,7 @@
 
 <P>  The time on the server is ${serverTime}. </P>
 <p>
-	<a href="<c:url value="/login"/>">로그인 페이지</a>
+	<a href="${pageContext.request.contextPath}/login">로그인 페이지</a>
 	<a href="#none" id="checkSession">세션 확인</a>
 	<a href="#none" id="logOut">로그아웃</a>
 </p>

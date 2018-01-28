@@ -40,5 +40,15 @@
 		<property name="authorizationBaseURL" value="${v1.kakao.authorizationBaseURL}"/>
 		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
 	</bean>
+	
+	<bean id="googleLogin" class="com.api.login.serviceBuild.LoginFactory">
+		<property name="serviceName" value="google"/>
+		<property name="clientId" value="${google.client.Id}"/>
+		<property name="clientSecret" value="${google.client.secret}"/>
+		<property name="redirectURL" value="${google.callbackURL}"/>
+		<property name="accesstokenEndpoint" value="${v1.google.accesstokenEndpoint}"/>
+		<property name="authorizationBaseURL" value="${v1.google.authorizationBaseURL}"/>
+		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
+	</bean>
 
 </beans>

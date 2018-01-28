@@ -30,6 +30,9 @@ public class LoginCBController {
 	@Resource(name="kakaoLogin")
 	private LoginAPI kakaoLogin;
 	
+	@Resource(name="googleLogin")
+	private LoginAPI googleLogin;
+	
 	private static final Logger logger = LoggerFactory.getLogger(LoginCBController.class);
 	
 	/**
@@ -80,7 +83,7 @@ public class LoginCBController {
 		
 		naverLogin.login(req, code, state);
 		
-        return "redirect:/";
+        return LoginAPI.SUCCESS_LOGIN_URL;
     }
     
     /**
@@ -131,6 +134,32 @@ public class LoginCBController {
 		
     	kakaoLogin.login(req, code, state);
 		
-        return "redirect:/";
+        return LoginAPI.SUCCESS_LOGIN_URL;
+    }
+    
+    /**
+	 * google login 처리를 진행한다.
+	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
+	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
+	 * @param code
+	 * @param state
+	 * @param req
+	 * @param model
+	 * @return
+	 * @throws Exception 
+	 */
+    @RequestMapping("/api/authen/login/google/callback")
+    public String googleCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
+    	
+		googleLogin.setUserMethod(new UserMethod() {
+			@Override
+			public UserVo getUserVo(JSONObject profile) {
+				return null;
+			}
+		});
+		
+		googleLogin.login(req, code, state);
+		
+        return LoginAPI.SUCCESS_LOGIN_URL;
     }
 }

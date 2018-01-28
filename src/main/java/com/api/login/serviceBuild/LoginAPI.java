@@ -20,8 +20,21 @@ public interface LoginAPI{
 	 */
 	public String LOGIN_SESSION_STATE_KEY="LoginState";
 	public String LOGIN_SESSION_KEY="LOGIN_SESSION_INFO";
+	
+	/**
+	 * 프로퍼티에서 프로필 정보 요청 api 주소를 불러올 키값
+	 */
 	public String USER_PROFILE="v1.user.profile";
+	
+	/**
+	 * 프로퍼티에서 logout api 주소를 불러올 키값
+	 */
 	public String LOGOUT_KEY="v1.accesstokenDelete";
+	
+	/**
+	 * 로그인 성공 후 이동할 URL
+	 */
+	public String SUCCESS_LOGIN_URL="redirect:/";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
