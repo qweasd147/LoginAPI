@@ -21,6 +21,8 @@ import com.api.WebUtil;
  * 인스턴스 새로 만들어서 쓰는게 좋을꺼 같음. 뭐 bean에 올라간 인스턴스
  * 데이터를 수정하는건 아니라서 별 상관 없기도 함....
  * 
+ * 소스가 많지도 않고 딱히 큰 장점은 없는데 다른 소스 보다가 이런식으로 만든게 보여서 그냥 이런식으로 만듦 
+ * 
  * TODO 현재 Model객체에 직접 접근하여 값을 넣는 부분도 있긴 한데 바꾸긴 해야하는데 일단 보류
  * @author joo
  *
@@ -90,6 +92,9 @@ public class HandleLoginFactory {
 		
 		boolean logOutResult = loginAPI.logOut();
 		
+		checkInstance();
+		
+		
 		if(logOutResult) {
 			params.put("result", "로그아웃 처리됨");
     	}else {
@@ -97,5 +102,28 @@ public class HandleLoginFactory {
     	}
 		
 		return params;
+	}
+	
+	public void checkInstance() {
+		
+		if(this.loginAPI == null) {
+			//TODO : exception 처리까진 보류
+			throw new RuntimeException("check LoginAPI.");
+		}
+	}
+	
+	public void checkInstanceList() {
+		
+		if(this.loginAPIList == null) {
+			//TODO : exception 처리까진 보류
+			throw new RuntimeException("check LoginAPI List.");
+		}
+		
+		for(LoginAPI loginAPI : this.loginAPIList) {
+			if(loginAPI == null) {
+				//TODO : exception 처리까진 보류
+				throw new RuntimeException("check LoginAPI.");
+			}
+		}
 	}
 }

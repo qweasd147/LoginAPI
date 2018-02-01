@@ -36,6 +36,11 @@ public class LoginCBController {
 	private static final Logger logger = LoggerFactory.getLogger(LoginCBController.class);
 	
 	/**
+	 * 로그인 성공 후 이동할 URL
+	 */
+	public String SUCCESS_LOGIN_URL="redirect:/";
+	
+	/**
 	 * naver login 처리를 진행한다.
 	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
 	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
@@ -83,7 +88,7 @@ public class LoginCBController {
 		
 		naverLogin.login(req, code, state);
 		
-        return LoginAPI.SUCCESS_LOGIN_URL;
+        return SUCCESS_LOGIN_URL;
     }
     
     /**
@@ -134,7 +139,7 @@ public class LoginCBController {
 		
     	kakaoLogin.login(req, code, state);
 		
-        return LoginAPI.SUCCESS_LOGIN_URL;
+        return SUCCESS_LOGIN_URL;
     }
     
     /**
@@ -154,12 +159,39 @@ public class LoginCBController {
 		googleLogin.setUserMethod(new UserMethod() {
 			@Override
 			public UserVo getUserVo(JSONObject profile) {
-				return null;
+				
+				
+				UserVo userVo = new UserVo();
+				
+				if(profile == null || !profile.containsKey("name") || !profile.containsKey("emails")) {
+					logger.error("통신 실패!");
+					
+					return null;
+				}
+				
+				JSONObject[] emails = (JSONObject[]) profile.get("emails");	//TODO : google에선 emails로 넘어오는데, 왜 이렇게 array로 넘겨주는지는 알아봐야함
+				JSONObject nameObj = (JSONObject) profile.get("name");
+				
+				
+				
+				String id =(String) profile.get("id");
+				String name = (String)nameObj.get("familyName") + nameObj.get("givenName");
+				String nickName = (String) profile.get("displayName");
+				String email = (String) emails[0].get("value");
+				
+				
+				userVo.setId(id)
+					.setName(name)
+					.setNickName(nickName)
+					.setEmail(email)
+					.setServiceName("google");
+				
+				return userVo;
 			}
 		});
 		
 		googleLogin.login(req, code, state);
 		
-        return LoginAPI.SUCCESS_LOGIN_URL;
+        return SUCCESS_LOGIN_URL;
     }
 }

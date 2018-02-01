@@ -29,12 +29,7 @@ public interface LoginAPI{
 	/**
 	 * 프로퍼티에서 logout api 주소를 불러올 키값
 	 */
-	public String LOGOUT_KEY="v1.accesstokenDelete";
-	
-	/**
-	 * 로그인 성공 후 이동할 URL
-	 */
-	public String SUCCESS_LOGIN_URL="redirect:/";
+	public String LOGOUT_KEY="v1.token.delete";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
