@@ -1,4 +1,4 @@
-package com.api.login;
+package com.api.login.serviceBuild;
 
 import java.io.IOException;
 import java.util.Map;
@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.api.model.UserVo;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.Verb;
 
@@ -19,8 +20,16 @@ public interface LoginAPI{
 	 */
 	public String LOGIN_SESSION_STATE_KEY="LoginState";
 	public String LOGIN_SESSION_KEY="LOGIN_SESSION_INFO";
+	
+	/**
+	 * 프로퍼티에서 프로필 정보 요청 api 주소를 불러올 키값
+	 */
 	public String USER_PROFILE="v1.user.profile";
-	public String LOGOUT_KEY="v1.accesstokenDelete";
+	
+	/**
+	 * 프로퍼티에서 logout api 주소를 불러올 키값
+	 */
+	public String LOGOUT_KEY="v1.token.delete";
 	
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
@@ -31,9 +40,10 @@ public interface LoginAPI{
 	/**
 	 * 로그인 요청 URL을 반환한다.
 	 * @param session
+	 * @param state
 	 * @return
 	 */
-	public String getAuthorizationUrl(HttpSession session);
+	public String getAuthorizationUrl(HttpSession session, String state);
 	
 	/**
 	 * 외부 제공지에서 accesstoken을 요청한다.
@@ -88,5 +98,11 @@ public interface LoginAPI{
 	 * @return
 	 */
 	public boolean accountVerify();
+	
+	/**
+	 * 현재 인스턴스의 서비스명(naver, kakao 등)을 가져온다.
+	 * @return
+	 */
+	public String getServiceName();
 
 }

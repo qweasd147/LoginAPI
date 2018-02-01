@@ -1,4 +1,4 @@
-package com.api.login;
+package com.api.model;
 
 public class UserVo {
 	private String serviceName;		//default, kakao, naver 등

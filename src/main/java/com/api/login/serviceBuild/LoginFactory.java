@@ -1,11 +1,10 @@
-package com.api.login;
+package com.api.login.serviceBuild;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.api.WebUtil;
-import com.api.login.LoginAPI;
+import com.api.login.serviceBuild.LoginAPI;
+import com.api.model.UserVo;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.builder.api.DefaultApi20;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -35,15 +35,17 @@ public class LoginFactory implements LoginAPI{
 	//TODO : 어디서 host값을 받아올지 고민중
 	private String host = "http://localhost";
 	
+	/**
+	 * serviceName만 interface에 getter를 만들어 놓음.
+	 * 그 외 정보는 다른곳에서 구지 핸들링 할 필요가 없을꺼 같음 
+	 */
+	
 	private String serviceName;
 	private String clientId;
 	private String clientSecret;
 	private String redirectURL;
 	
 	private static final JSONParser JSON_PARSER = new JSONParser();
-	
-	private static final String CLIENT_ID = "client_id";
-	private static final String CLIENT_SECRET = "client_secret";
 	
 	private LoginAPI.UserMethod userMethod;
 	
@@ -74,9 +76,6 @@ public class LoginFactory implements LoginAPI{
 		this.redirectURL = host+redirectURL;
 	}
 
-	public String getServiceName(){
-		return this.serviceName;
-	}
 	
 	public void setAccesstokenEndpoint(String accessTokenEndPoint){
 		innerAPI.accessTokenEndPoint = accessTokenEndPoint;
@@ -87,27 +86,16 @@ public class LoginFactory implements LoginAPI{
 	}
 	
 	@Override
+	public String getServiceName() {
+		return this.serviceName;
+	}
+	
+	@Override
 	public void setUserMethod(UserMethod method) {
 		this.userMethod = method;
 	}
 	
-	/**
-	 * 세션 유효성 검증을 위한 난수 생성기 
-	 * @return
-	 */
-	private static String generateRandomString() {
-		return UUID.randomUUID().toString();
-	}
 
-	/**
-	 * session에서 login관련 상태값을 넣는다.
-	 * @param session
-	 * @param state
-	 */
-	private void setSessionState(HttpSession session,String state){
-		session.setAttribute(LoginAPI.LOGIN_SESSION_STATE_KEY, state);		
-	}
-	
 	/**
 	 * 세션에 담긴 값을 넣는다.
 	 * @param session
@@ -118,11 +106,7 @@ public class LoginFactory implements LoginAPI{
 	}
 
 	@Override
-	public String getAuthorizationUrl(HttpSession session) {
-		// 세션 유효성 검증을 위하여 난수를 생성
-		String state = generateRandomString();
-		//생성한 난수 값을 session에 저장
-		setSessionState(session,state);
+	public String getAuthorizationUrl(HttpSession session, String state) {
 		
 		//Scribe에서 제공하는 인증 URL 생성
 		OAuth20Service oauthService = getServiceBuilder(true).state(state).build(innerAPI);
@@ -135,12 +119,12 @@ public class LoginFactory implements LoginAPI{
 		
 		//Callback으로 전달받은 세선검증용 난수값과 세션에 저장되어있는 값이 일치하는지 확인
 		String sessionState = getSessionState(session);
-		if(sessionState !=null && sessionState.equals(state)){
 		
+		if(sessionState !=null && sessionState.equals(state)){
 			OAuth20Service oauthService = getServiceBuilder(true).build(innerAPI);
 			// Scribe에서 제공하는 AccessToken 획득 기능으로 네아로 Access Token을 획득 
-			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
 			
+			OAuth2AccessToken accessToken = oauthService.getAccessToken(code);
 			return accessToken;
 		}
 		return null;
@@ -205,7 +189,7 @@ public class LoginFactory implements LoginAPI{
 	@Override
 	public String getAccessTokenFromSession() {
 		
-		UserVo userVo = (UserVo) WebUtil.getSession(LoginAPI.LOGIN_SESSION_KEY);
+		UserVo userVo = (UserVo) WebUtil.getSessionAttribute(LoginAPI.LOGIN_SESSION_KEY);
 		
 		if(userVo == null)	return null;
 		
@@ -256,6 +240,12 @@ public class LoginFactory implements LoginAPI{
 		
 		OAuth2AccessToken oauthToken = getOAuthAccessToken(session, code, state);
     	
+		if(oauthToken == null) {
+			logger.error("로그인 잘못됨! state값과 session에 저장된 state 값이 다름");
+			
+			return false;
+		}
+		
     	String token = oauthToken.getAccessToken();
     	
     	UserVo userVo = getUserProfile(oauthToken);
@@ -273,7 +263,7 @@ public class LoginFactory implements LoginAPI{
 		 * TODO : userVo로 DB에 등록된 사용자를 조회. DB 구축되면 구현
     	Object userData = loginService.getUser(userVo);
     	*/
-    	WebUtil.setSession(req, LoginAPI.LOGIN_SESSION_KEY, userVo);
+    	WebUtil.setSessionAttribute(req, LoginAPI.LOGIN_SESSION_KEY, userVo);
     	
     	logger.info("login success. User Vo :"+userVo);
     	
@@ -287,6 +277,8 @@ public class LoginFactory implements LoginAPI{
 		//권장 방법은 그냥 access token을 반납(삭제) 하라고 적혀있음
 		//naver에선 반납 시, accesstoken이 유효한지 먼저 검사 해보라 하는데 유효 여부가 중요 한가 싶음...
 		
+		//추가 내용. 카카오에는 API 있음... 
+		//파라미터 다름... method 다름.... 환장하겠네
 		String result = null;
 		
 		try {
@@ -295,8 +287,9 @@ public class LoginFactory implements LoginAPI{
 			
 			Map<String, String> map = new HashMap<String, String>();
 			
-			map.put(CLIENT_ID, clientId);
-			map.put(CLIENT_SECRET, clientSecret);
+			map.put(OAuthConstants.CLIENT_ID, clientId);
+			map.put(OAuthConstants.CLIENT_SECRET, clientSecret);
+			map.put("token", getAccessTokenFromSession());
 			
 			result = requestAPI(Verb.GET,requestKey , map);
 			
@@ -315,7 +308,7 @@ public class LoginFactory implements LoginAPI{
 	@Override
 	public boolean accountVerify() {
 		//TODO : 세션에 로그인 정보가 있는지, access token이 유효한지.....
-		//세션 판별 api 찾고있는중
+		//판별 api 찾고있는중
 		return false;
 	}
 	

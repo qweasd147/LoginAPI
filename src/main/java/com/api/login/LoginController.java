@@ -1,54 +1,67 @@
 package com.api.login;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.api.WebUtil;
-import com.api.login.LoginAPI;
-import com.api.login.LoginAPI.UserMethod;
 import com.api.login.service.LoginService;
+import com.api.login.serviceBuild.HandleLoginFactory;
+import com.api.login.serviceBuild.LoginAPI;
+import com.api.login.serviceBuild.LoginFactory;
+import com.api.model.UserVo;
 
 /**
- * Handles requests for the application home page.
+ * login, logout 처리 controller.
+ * 차후 loginFactory 인스턴스(beab)가 추가 된다 하더라도, 현재 class는
+ * 수정사항 없이 관리 할 예정
+ * @author joo
+ *
  */
 @Controller
 public class LoginController{
 	
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-
-	@Resource(name="naverLogin")
-	private LoginAPI naverLogin;
 	
-	@Resource(name="kakaoLogin")
-	private LoginAPI kakaoLogin;
-	
+	//차후 API에서 받은 사용자 정보를 바탕으로 프로젝트 내 DB 조회 등 목적으로 만들어 놓기만 한 service 
 	//@Autowired
-	LoginService loginService;
+	private LoginService loginService;
 	
 	
 	@Autowired
-	private List<? extends LoginFactory> list;
+	private List<? extends LoginFactory> loginFactoryList;
+	
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String home(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "home";
+	}
 	
 	/**
 	 * 로그인 페이지로 이동 요청 바인딩
@@ -57,119 +70,19 @@ public class LoginController{
 	@RequestMapping("/login")
     public String loginList(HttpServletRequest req, Model model) {
 		
-		HttpSession session = req.getSession();
-		
-		if(list != null){
-			for(int i=0;i<list.size();i++){
-				LoginFactory loginFactoryClazz = list.get(i);
-				
-				logger.info("load login factory. "+loginFactoryClazz.getServiceName());
-				
-				String authURL = loginFactoryClazz.getAuthorizationUrl(session);
-				
-				String serviceUrlName = loginFactoryClazz.getServiceName()+"URL";
-				
-				model.addAttribute(serviceUrlName, authURL);
-			}
-		}else{
-			logger.warn("not exist LoginFactory instance");
-		}
-		
+		//로그인 URL 값을 model에 넣는다.
+		new HandleLoginFactory(loginFactoryList).setLoginURLParams(model);
 		
         return "loginList";
     }
  
-	/**
-	 * naver login 처리를 진행한다.
-	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
-	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
-	 * @param code
-	 * @param state
-	 * @param req
-	 * @param model
-	 * @return
-	 * @throws Exception 
-	 */
-    @RequestMapping("/api/authen/login/naver/callback")
-    public String naverCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	
-		naverLogin.setUserMethod(new UserMethod() {
-			@Override
-			public UserVo getUserVo(JSONObject profile) {
-				
-				String result = (String) profile.get("message");
-				
-				if(!"success".equals(result)){
-					
-					logger.error("통신 실패!");
-					
-					return null;
-				};
-				
-				UserVo userVo = new UserVo();
-				
-				JSONObject respJSON = (JSONObject) profile.get("response");
-				
-				String id = (String) respJSON.get("id");
-				String name = (String) respJSON.get("name");
-				String nickName = (String) respJSON.get("nickname");
-				String email = (String) respJSON.get("email");
-				
-				userVo.setId(id)
-						.setName(name)
-						.setNickName(nickName)
-						.setEmail(email)
-						.setServiceName("naver");
-					
-				return userVo;
-			}
-		});
-		
-		naverLogin.login(req, code, state);
-		
-        return "home";
-    }
-    
-    /**
-	 * naver login 처리를 진행한다.
-	 * code, state는 callback을 호출 시, 외부(네이버)에서 제공받음
-	 * 각 sns마다 제공하는 데이터 형태가 다를 수 있어서, callback은 각 sns마다 따로 구현해야됨
-	 * @param code
-	 * @param state
-	 * @param req
-	 * @param model
-	 * @return
-	 * @throws Exception 
-	 */
-    @RequestMapping("/api/authen/login/kakao/callback")
-    public String kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	
-    	System.out.println("code : "+code);
-    	System.out.println("state : "+state);
-    	
-    	kakaoLogin.setUserMethod(new UserMethod() {
-			@Override
-			public UserVo getUserVo(JSONObject profile) {
-				
-				System.out.println("profile");
-				System.out.println(profile);
-					
-				return null;
-			}
-		});
-		
-    	kakaoLogin.login(req, code, state);
-		
-        return "home";
-    }
-    
     @RequestMapping("/logOut")
     @ResponseBody
     public Map<String, String> logOut(HttpServletRequest req, Model model) throws IOException {
     	
-    	UserVo userVo = (UserVo) WebUtil.getSession(LoginAPI.LOGIN_SESSION_KEY);
-    	
     	Map<String, String> map = new HashMap<String, String>();
+    	
+    	UserVo userVo = (UserVo) WebUtil.getSessionAttribute(LoginAPI.LOGIN_SESSION_KEY);
     	
     	if(userVo == null) {
     		
@@ -180,21 +93,11 @@ public class LoginController{
     		return map;
     	}
     	
-    	LoginAPI loginAPI = null;
+    	LoginAPI loginAPI = (LoginAPI) WebUtil.getBean(userVo.getServiceName()+"Login");
     	
-    	loginAPI = (LoginAPI) WebUtil.getBean(req, userVo.getServiceName()+"Login");
+    	Map<String, String> resultMap = new HandleLoginFactory(loginAPI).getLogOutResult(map);
     	
-    	if(loginAPI == null) {
-    		logger.debug("logout 의존주입 실패!!!");
-    	}
-    	
-    	boolean logOutResult = loginAPI.logOut();
-    	
-    	if(logOutResult) {
-    		map.put("result", "로그아웃 처리됨");
-    	}else {
-    		map.put("result", "시스템 오류");
-    	}
+    	map.putAll(resultMap);
     	
     	return map;
     }
