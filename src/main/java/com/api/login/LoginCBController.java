@@ -3,7 +3,6 @@ package com.api.login;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -11,9 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.api.login.serviceBuild.LoginAPI;
-import com.api.login.serviceBuild.LoginAPI.UserMethod;
-import com.api.model.UserVo;
+import com.api.login.service.build.LoginAPI;
 
 /**
  * login service하는 곳(REST API)이 추가 될때 마다 불가피하게 소스 수정이
@@ -53,7 +50,7 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/naver/callback")
     public String naverCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	
+    	/*
 		naverLogin.setUserMethod(new UserMethod() {
 			@Override
 			public UserVo getUserVo(JSONObject profile) {
@@ -85,7 +82,7 @@ public class LoginCBController {
 				return userVo;
 			}
 		});
-		
+		*/
 		naverLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;
@@ -104,7 +101,7 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/kakao/callback")
     public String kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	
+    	/*
     	kakaoLogin.setUserMethod(new UserMethod() {
 			@Override
 			public UserVo getUserVo(JSONObject profile) {
@@ -136,7 +133,7 @@ public class LoginCBController {
 				return userVo;
 			}
 		});
-		
+		*/
     	kakaoLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;
@@ -155,7 +152,7 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/google/callback")
     public String googleCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	
+    	/*
 		googleLogin.setUserMethod(new UserMethod() {
 			@Override
 			public UserVo getUserVo(JSONObject profile) {
@@ -189,7 +186,7 @@ public class LoginCBController {
 				return userVo;
 			}
 		});
-		
+		*/
 		googleLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;

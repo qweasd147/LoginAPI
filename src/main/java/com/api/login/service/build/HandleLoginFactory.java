@@ -1,4 +1,4 @@
-package com.api.login.serviceBuild;
+package com.api.login.service.build;
 
 import java.util.List;
 import java.util.Map;

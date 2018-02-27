@@ -20,7 +20,7 @@
 	</bean>
 	 -->
 
-
+	<!-- 
 	<bean id="naverLogin" class="com.api.login.serviceBuild.LoginFactory">
 		<property name="serviceName" value="naver"/>
 		<property name="clientId" value="${naver.client.Id}"/>
@@ -28,7 +28,6 @@
 		<property name="redirectURL" value="${naver.callbackURL}"/>
 		<property name="accesstokenEndpoint" value="${v1.naver.accesstokenEndpoint}"/>
 		<property name="authorizationBaseURL" value="${v1.naver.authorizationBaseURL}"/>
-		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
 	</bean>
 	
 	<bean id="kakaoLogin" class="com.api.login.serviceBuild.LoginFactory">
@@ -38,7 +37,6 @@
 		<property name="redirectURL" value="${kakao.callbackURL}"/>
 		<property name="accesstokenEndpoint" value="${v1.kakao.accesstokenEndpoint}"/>
 		<property name="authorizationBaseURL" value="${v1.kakao.authorizationBaseURL}"/>
-		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
 	</bean>
 	
 	<bean id="googleLogin" class="com.api.login.serviceBuild.LoginFactory">
@@ -48,7 +46,34 @@
 		<property name="redirectURL" value="${google.callbackURL}"/>
 		<property name="accesstokenEndpoint" value="${v1.google.accesstokenEndpoint}"/>
 		<property name="authorizationBaseURL" value="${v1.google.authorizationBaseURL}"/>
-		<!-- <property name="defaultAPI" ref="naverAPI"/> -->
+	</bean>
+	-->
+	 
+	<bean id="kakaoLogin" class="com.api.login.service.support.KakaoAPI">
+		<property name="serviceName" value="kakao"/>
+		<property name="clientId" value="${kakao.client.Id}"/>
+		<property name="clientSecret" value="${kakao.client.secret}"/>
+		<property name="redirectURL" value="${kakao.callbackURL}"/>
+		<property name="accessTokenEndPoint" value="${v1.kakao.accesstokenEndpoint}"/>
+		<property name="authorizationBaseURL" value="${v1.kakao.authorizationBaseURL}"/>
+	</bean>
+	
+	<bean id="naverLogin" class="com.api.login.service.support.naverAPI">
+		<property name="serviceName" value="naver"/>
+		<property name="clientId" value="${naver.client.Id}"/>
+		<property name="clientSecret" value="${naver.client.secret}"/>
+		<property name="redirectURL" value="${naver.callbackURL}"/>
+		<property name="accesstokenEndpoint" value="${v1.naver.accesstokenEndpoint}"/>
+		<property name="authorizationBaseURL" value="${v1.naver.authorizationBaseURL}"/>
+	</bean>
+	
+	<bean id="googleLogin" class="com.api.login.service.support.googleAPI">
+		<property name="serviceName" value="google"/>
+		<property name="clientId" value="${google.client.Id}"/>
+		<property name="clientSecret" value="${google.client.secret}"/>
+		<property name="redirectURL" value="${google.callbackURL}"/>
+		<property name="accesstokenEndpoint" value="${v1.google.accesstokenEndpoint}"/>
+		<property name="authorizationBaseURL" value="${v1.google.authorizationBaseURL}"/>
 	</bean>
 
 </beans>

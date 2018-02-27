@@ -1,4 +1,4 @@
-package com.api.login.serviceBuild;
+package com.api.login.service.build;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.api.WebUtil;
-import com.api.login.serviceBuild.LoginAPI;
+import com.api.login.service.build.LoginAPI;
 import com.api.model.UserVo;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.builder.api.DefaultApi20;
@@ -28,7 +28,7 @@ import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
-public class LoginFactory implements LoginAPI{
+public abstract class LoginFactory implements LoginAPI{
 	
 	private static final Logger logger = LoggerFactory.getLogger(LoginFactory.class);
 	
@@ -40,14 +40,15 @@ public class LoginFactory implements LoginAPI{
 	 * 그 외 정보는 다른곳에서 구지 핸들링 할 필요가 없을꺼 같음 
 	 */
 	
+	/*
 	private String serviceName;
 	private String clientId;
 	private String clientSecret;
 	private String redirectURL;
-	
+	*/
 	private static final JSONParser JSON_PARSER = new JSONParser();
 	
-	private LoginAPI.UserMethod userMethod;
+	//private LoginAPI.UserMethod userMethod;
 	
 	
 	//request 주소를 담은 프로퍼티
@@ -56,46 +57,35 @@ public class LoginFactory implements LoginAPI{
 	
 	public InnerAPI innerAPI = new InnerAPI();
 	
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
+	public abstract void setServiceName(String serviceName);
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+	public abstract void setClientId(String clientId);
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+	public abstract void setClientSecret(String clientSecret);
 
-	public void setClientSecret(String clientSecret) {
-		this.clientSecret = clientSecret;
-	}
+	public abstract void setRedirectURL(String redirectURL);
 
-	public void setRedirectURL(String redirectURL) {
-		this.redirectURL = host+redirectURL;
-	}
-
+	public abstract void setAccesstokenEndpoint(String accessTokenEndPoint);
 	
-	public void setAccesstokenEndpoint(String accessTokenEndPoint){
-		innerAPI.accessTokenEndPoint = accessTokenEndPoint;
-	}
+	public abstract void setAuthorizationBaseURL(String authorizationBaseURL);
 	
-	public void setAuthorizationBaseURL(String authorizationBaseUrl){
-		innerAPI.authorizationBaseUrl = authorizationBaseUrl;
-	}
+	public abstract String getServiceName();
 	
-	@Override
-	public String getServiceName() {
-		return this.serviceName;
-	}
+	public abstract String getClientId();
 	
-	@Override
-	public void setUserMethod(UserMethod method) {
-		this.userMethod = method;
-	}
+	public abstract String getClientSecret();
 	
-
+	public abstract String getRedirectURL();
+	
+	public abstract String getAccesstokenEndpoint();
+	
+	public abstract String getAuthorizationBaseURL();
+	
+	public abstract UserVo getUserVo(JSONObject userProfile);
+	
+	public abstract String logoutProcess() throws IOException;
+	
+	
 	/**
 	 * 세션에 담긴 값을 넣는다.
 	 * @param session
@@ -222,13 +212,15 @@ public class LoginFactory implements LoginAPI{
 		
 		JSONObject userProfile = (JSONObject)JSON_PARSER.parse(strResult);
 		
+		/*
 		if(userMethod == null) {
 			logger.error("UserMethod가 정의되어 있지 않음");
 			
 			return null;
 		}
+		*/
 		
-		UserVo userVo = userMethod.getUserVo(userProfile);
+		UserVo userVo = getUserVo(userProfile);
 		
 		return userVo;
 	}
@@ -282,18 +274,22 @@ public class LoginFactory implements LoginAPI{
 		String result = null;
 		
 		try {
-			
+			/*
 			String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
 			
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> params = new HashMap<String, String>();
 			
-			map.put(OAuthConstants.CLIENT_ID, clientId);
-			map.put(OAuthConstants.CLIENT_SECRET, clientSecret);
-			map.put("token", getAccessTokenFromSession());
+			params.put(OAuthConstants.CLIENT_ID, getClientId());
+			params.put(OAuthConstants.CLIENT_SECRET, getClientSecret());
+			params.put("token", getAccessTokenFromSession());
 			
-			result = requestAPI(Verb.GET,requestKey , map);
+			result = requestAPI(Verb.GET,requestKey , params);
+			*/
+			
+			result = logoutProcess();
 			
 			logger.info("로그아웃 성공. msg : "+result);
+			
 		} catch (IOException e) {
 			logger.warn("logout 요청에 실패!");
 		}finally {
@@ -320,31 +316,28 @@ public class LoginFactory implements LoginAPI{
 	 */
 	private class InnerAPI extends DefaultApi20{
 		
-		public String accessTokenEndPoint; 
-		
-		public String authorizationBaseUrl;
-		
-		
 		@Override
 		public String getAccessTokenEndpoint() {
-			return accessTokenEndPoint;
+			return getAccesstokenEndpoint();
 		}
 
 		@Override
 		protected String getAuthorizationBaseUrl() {
-			return authorizationBaseUrl;
+			return getAuthorizationBaseUrl();
 		}
 	}
 	
 	private ServiceBuilder getServiceBuilder(boolean addCallback){
 		
-		ServiceBuilder sb = new ServiceBuilder().apiKey(clientId);
+		ServiceBuilder sb = new ServiceBuilder().apiKey(getClientId());
+		
+		String clientSecret = getClientSecret(); 
 		
 		if(clientSecret != null && !clientSecret.isEmpty())
 			sb.apiSecret(clientSecret);
 		
 		if(addCallback){
-			sb.callback(redirectURL);
+			sb.callback(getRedirectURL());
 		}
 		
 		return sb;

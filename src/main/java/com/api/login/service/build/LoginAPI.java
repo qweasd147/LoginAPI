@@ -1,4 +1,4 @@
-package com.api.login.serviceBuild;
+package com.api.login.service.build;
 
 import java.io.IOException;
 import java.util.Map;
@@ -34,8 +34,6 @@ public interface LoginAPI{
 	public interface UserMethod{
 		public UserVo getUserVo(JSONObject profile);
 	};
-	
-	public void setUserMethod(UserMethod method);
 	
 	/**
 	 * 로그인 요청 URL을 반환한다.
