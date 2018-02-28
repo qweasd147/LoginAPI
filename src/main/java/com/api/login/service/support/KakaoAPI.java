@@ -2,13 +2,18 @@ package com.api.login.service.support;
 
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.api.login.service.build.LoginAPI;
 import com.api.login.service.build.LoginFactory;
 import com.api.model.UserVo;
+import com.github.scribejava.core.model.OAuthConstants;
+import com.github.scribejava.core.model.Verb;
 
 public class KakaoAPI extends LoginFactory{
 	
@@ -117,7 +122,11 @@ public class KakaoAPI extends LoginFactory{
 
 	@Override
 	public String logoutProcess() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
+		
+		String result = requestAPI(Verb.GET,requestKey , null);;
+		
+		return result;
 	}
 }

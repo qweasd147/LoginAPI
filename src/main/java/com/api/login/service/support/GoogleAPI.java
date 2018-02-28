@@ -2,17 +2,22 @@ package com.api.login.service.support;
 
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.api.login.service.build.LoginAPI;
 import com.api.login.service.build.LoginFactory;
 import com.api.model.UserVo;
+import com.github.scribejava.core.model.OAuthConstants;
+import com.github.scribejava.core.model.Verb;
 
-public class naverAPI extends LoginFactory{
+public class GoogleAPI extends LoginFactory{
 	
-	private static final Logger logger = LoggerFactory.getLogger(naverAPI.class);
+	private static final Logger logger = LoggerFactory.getLogger(GoogleAPI.class);
 	
 	//TODO : host값을 어디서 초기화 해야 하는지 고민중
 	private String host = "http://localhost";
@@ -60,7 +65,6 @@ public class naverAPI extends LoginFactory{
 		return serviceName;
 	}
 
-
 	@Override
 	public String getClientId() {
 		return clientId;
@@ -87,38 +91,44 @@ public class naverAPI extends LoginFactory{
 	}
 
 	@Override
-	public UserVo getUserVo(JSONObject profile) {
+	public UserVo getUserVo(JSONObject userProfile) {
+		UserVo userVo = new UserVo();
 		
-		String result = (String) profile.get("message");
-		
-		if(!"success".equals(result)){
-			
+		if(userProfile == null || !userProfile.containsKey("name") || !userProfile.containsKey("emails")) {
 			logger.error("통신 실패!");
 			
 			return null;
-		};
+		}
 		
-		UserVo userVo = new UserVo();
+		JSONObject[] emails = (JSONObject[]) userProfile.get("emails");	//TODO : google에선 emails로 넘어오는데, 왜 이렇게 array로 넘겨주는지는 알아봐야함
+		JSONObject nameObj = (JSONObject) userProfile.get("name");
 		
-		JSONObject respJSON = (JSONObject) profile.get("response");
 		
-		String id = (String) respJSON.get("id");
-		String name = (String) respJSON.get("name");
-		String nickName = (String) respJSON.get("nickname");
-		String email = (String) respJSON.get("email");
+		
+		String id =(String) userProfile.get("id");
+		String name = (String)nameObj.get("familyName") + nameObj.get("givenName");
+		String nickName = (String) userProfile.get("displayName");
+		String email = (String) emails[0].get("value");
+		
 		
 		userVo.setId(id)
-				.setName(name)
-				.setNickName(nickName)
-				.setEmail(email)
-				.setServiceName("naver");
+			.setName(name)
+			.setNickName(nickName)
+			.setEmail(email)
+			.setServiceName("google");
 		
 		return userVo;
 	}
 
 	@Override
 	public String logoutProcess() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
+		
+		Map<String, String> params = new HashMap<String, String>();
+		
+		params.put("token", getAccessTokenFromSession());
+		
+		return requestAPI(Verb.GET,requestKey , params);
 	}
 }

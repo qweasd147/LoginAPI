@@ -54,11 +54,11 @@
 		<property name="clientId" value="${kakao.client.Id}"/>
 		<property name="clientSecret" value="${kakao.client.secret}"/>
 		<property name="redirectURL" value="${kakao.callbackURL}"/>
-		<property name="accessTokenEndPoint" value="${v1.kakao.accesstokenEndpoint}"/>
+		<property name="accesstokenEndpoint" value="${v1.kakao.accesstokenEndpoint}"/>
 		<property name="authorizationBaseURL" value="${v1.kakao.authorizationBaseURL}"/>
 	</bean>
 	
-	<bean id="naverLogin" class="com.api.login.service.support.naverAPI">
+	<bean id="naverLogin" class="com.api.login.service.support.NaverAPI">
 		<property name="serviceName" value="naver"/>
 		<property name="clientId" value="${naver.client.Id}"/>
 		<property name="clientSecret" value="${naver.client.secret}"/>
@@ -67,7 +67,7 @@
 		<property name="authorizationBaseURL" value="${v1.naver.authorizationBaseURL}"/>
 	</bean>
 	
-	<bean id="googleLogin" class="com.api.login.service.support.googleAPI">
+	<bean id="googleLogin" class="com.api.login.service.support.GoogleAPI">
 		<property name="serviceName" value="google"/>
 		<property name="clientId" value="${google.client.Id}"/>
 		<property name="clientSecret" value="${google.client.secret}"/>

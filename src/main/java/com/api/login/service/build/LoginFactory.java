@@ -265,36 +265,15 @@ public abstract class LoginFactory implements LoginAPI{
 	@Override
 	public boolean logOut() {
 		
-		//naver 기준 로그아웃 API는 별도로 존재하지 않다고 함. 이유는 이용자 보호 정책이라 적혀 있음.
-		//권장 방법은 그냥 access token을 반납(삭제) 하라고 적혀있음
-		//naver에선 반납 시, accesstoken이 유효한지 먼저 검사 해보라 하는데 유효 여부가 중요 한가 싶음...
-		
-		//추가 내용. 카카오에는 API 있음... 
-		//파라미터 다름... method 다름.... 환장하겠네
 		String result = null;
 		
 		try {
-			/*
-			String requestKey = getPropertiesKey(LoginAPI.LOGOUT_KEY);
-			
-			Map<String, String> params = new HashMap<String, String>();
-			
-			params.put(OAuthConstants.CLIENT_ID, getClientId());
-			params.put(OAuthConstants.CLIENT_SECRET, getClientSecret());
-			params.put("token", getAccessTokenFromSession());
-			
-			result = requestAPI(Verb.GET,requestKey , params);
-			*/
-			
 			result = logoutProcess();
 			
 			logger.info("로그아웃 성공. msg : "+result);
-			
 		} catch (IOException e) {
 			logger.warn("logout 요청에 실패!");
 		}finally {
-			//api를 통해 logout 성공 여부와 상관없이 session에 로그인 정보를 지운다.
-			//설사 실패 하였어도, token 사용 및 접근 불가
 			WebUtil.removeSessionAttribute(LoginAPI.LOGIN_SESSION_KEY);
 		}
 		
@@ -318,12 +297,12 @@ public abstract class LoginFactory implements LoginAPI{
 		
 		@Override
 		public String getAccessTokenEndpoint() {
-			return getAccesstokenEndpoint();
+			return LoginFactory.this.getAccesstokenEndpoint();
 		}
 
 		@Override
 		protected String getAuthorizationBaseUrl() {
-			return getAuthorizationBaseUrl();
+			return LoginFactory.this.getAuthorizationBaseURL();
 		}
 	}
 	
@@ -343,7 +322,7 @@ public abstract class LoginFactory implements LoginAPI{
 		return sb;
 	}
 	
-	private String getPropertiesKey(String commandKey){
+	protected String getPropertiesKey(String commandKey){
 		return getServiceName()+"."+commandKey;
 	}
 }

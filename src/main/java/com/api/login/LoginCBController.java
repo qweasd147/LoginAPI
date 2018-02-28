@@ -50,39 +50,6 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/naver/callback")
     public String naverCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	/*
-		naverLogin.setUserMethod(new UserMethod() {
-			@Override
-			public UserVo getUserVo(JSONObject profile) {
-				
-				String result = (String) profile.get("message");
-				
-				if(!"success".equals(result)){
-					
-					logger.error("통신 실패!");
-					
-					return null;
-				};
-				
-				UserVo userVo = new UserVo();
-				
-				JSONObject respJSON = (JSONObject) profile.get("response");
-				
-				String id = (String) respJSON.get("id");
-				String name = (String) respJSON.get("name");
-				String nickName = (String) respJSON.get("nickname");
-				String email = (String) respJSON.get("email");
-				
-				userVo.setId(id)
-						.setName(name)
-						.setNickName(nickName)
-						.setEmail(email)
-						.setServiceName("naver");
-				
-				return userVo;
-			}
-		});
-		*/
 		naverLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;
@@ -101,39 +68,6 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/kakao/callback")
     public String kakaoCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	/*
-    	kakaoLogin.setUserMethod(new UserMethod() {
-			@Override
-			public UserVo getUserVo(JSONObject profile) {
-				
-				UserVo userVo = new UserVo();
-				JSONObject properties = null;
-				
-				if(profile == null || !profile.containsKey("properties")) {
-					logger.error("통신 실패!");
-					
-					return null;
-				}
-				
-				properties = (JSONObject) profile.get("properties");
-				
-				
-				String id =profile.get("id").toString();	//long 형태로 반환된걸 String으로 변환
-				String name = (String) properties.get("nickname");
-				String nickName = (String) properties.get("nickname");
-				String email = (String) profile.get("kaccount_email");
-				
-				
-				userVo.setId(id)
-					.setName(name)
-					.setNickName(nickName)
-					.setEmail(email)
-					.setServiceName("kakao");
-				
-				return userVo;
-			}
-		});
-		*/
     	kakaoLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;
@@ -152,41 +86,7 @@ public class LoginCBController {
 	 */
     @RequestMapping("/api/authen/login/google/callback")
     public String googleCallback(@RequestParam String code, @RequestParam String state, HttpServletRequest req, Model model) throws Exception {
-    	/*
-		googleLogin.setUserMethod(new UserMethod() {
-			@Override
-			public UserVo getUserVo(JSONObject profile) {
-				
-				
-				UserVo userVo = new UserVo();
-				
-				if(profile == null || !profile.containsKey("name") || !profile.containsKey("emails")) {
-					logger.error("통신 실패!");
-					
-					return null;
-				}
-				
-				JSONObject[] emails = (JSONObject[]) profile.get("emails");	//TODO : google에선 emails로 넘어오는데, 왜 이렇게 array로 넘겨주는지는 알아봐야함
-				JSONObject nameObj = (JSONObject) profile.get("name");
-				
-				
-				
-				String id =(String) profile.get("id");
-				String name = (String)nameObj.get("familyName") + nameObj.get("givenName");
-				String nickName = (String) profile.get("displayName");
-				String email = (String) emails[0].get("value");
-				
-				
-				userVo.setId(id)
-					.setName(name)
-					.setNickName(nickName)
-					.setEmail(email)
-					.setServiceName("google");
-				
-				return userVo;
-			}
-		});
-		*/
+    	
 		googleLogin.login(req, code, state);
 		
         return SUCCESS_LOGIN_URL;
