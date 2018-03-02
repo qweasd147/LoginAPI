@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.api.login.service.build.LoginAPI;
 import com.api.login.service.build.LoginFactory;
 import com.api.model.UserVo;
-import com.github.scribejava.core.model.OAuthConstants;
 import com.github.scribejava.core.model.Verb;
 
 public class KakaoAPI extends LoginFactory{
@@ -102,20 +101,25 @@ public class KakaoAPI extends LoginFactory{
 			return null;
 		}
 		
-		properties = (JSONObject) userProfile.get("properties");
-		
-		
-		String id =userProfile.get("id").toString();	//long 형태로 반환된걸 String으로 변환
-		String name = (String) properties.get("nickname");
-		String nickName = (String) properties.get("nickname");
-		String email = (String) userProfile.get("kaccount_email");
-		
-		
-		userVo.setId(id)
-			.setName(name)
-			.setNickName(nickName)
-			.setEmail(email)
-			.setServiceName("kakao");
+		try {
+			properties = (JSONObject) userProfile.get("properties");
+			
+			
+			String id =userProfile.get("id").toString();	//long 형태로 반환된걸 String으로 변환
+			String name = (String) properties.get("nickname");
+			String nickName = (String) properties.get("nickname");
+			String email = (String) userProfile.get("kaccount_email");
+			
+			
+			userVo.setId(id)
+				.setName(name)
+				.setNickName(nickName)
+				.setEmail(email)
+				.setServiceName("kakao");
+		}catch (Exception e) {
+			//parsing exception
+			throw e;
+		}
 		
 		return userVo;
 	}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.api.login.service.build.LoginAPI;
 import com.api.login.service.build.LoginFactory;
 import com.api.model.UserVo;
-import com.github.scribejava.core.model.OAuthConstants;
 import com.github.scribejava.core.model.Verb;
 
 public class GoogleAPI extends LoginFactory{
@@ -91,7 +91,7 @@ public class GoogleAPI extends LoginFactory{
 	}
 
 	@Override
-	public UserVo getUserVo(JSONObject userProfile) {
+	public UserVo getUserVo(JSONObject userProfile){
 		UserVo userVo = new UserVo();
 		
 		if(userProfile == null || !userProfile.containsKey("name") || !userProfile.containsKey("emails")) {
@@ -100,22 +100,26 @@ public class GoogleAPI extends LoginFactory{
 			return null;
 		}
 		
-		JSONObject[] emails = (JSONObject[]) userProfile.get("emails");	//TODO : google에선 emails로 넘어오는데, 왜 이렇게 array로 넘겨주는지는 알아봐야함
-		JSONObject nameObj = (JSONObject) userProfile.get("name");
-		
-		
-		
-		String id =(String) userProfile.get("id");
-		String name = (String)nameObj.get("familyName") + nameObj.get("givenName");
-		String nickName = (String) userProfile.get("displayName");
-		String email = (String) emails[0].get("value");
-		
-		
-		userVo.setId(id)
-			.setName(name)
-			.setNickName(nickName)
-			.setEmail(email)
-			.setServiceName("google");
+		try {
+			JSONArray emails = (JSONArray) userProfile.get("emails");	//TODO : google에선 emails로 넘어오는데, 왜 이렇게 array로 넘겨주는지는 알아봐야함
+			JSONObject nameObj = (JSONObject) userProfile.get("name");
+			
+			String id =(String) userProfile.get("id");
+			String name = (String)nameObj.get("familyName") + nameObj.get("givenName");
+			String nickName = (String) userProfile.get("displayName");
+			
+			JSONObject firstEmail = (JSONObject) emails.get(0);
+			String email = (String)firstEmail.get("value");
+			
+			
+			userVo.setId(id)
+				.setName(name)
+				.setNickName(nickName)
+				.setEmail(email)
+				.setServiceName("google");
+		}catch (Exception e) {
+			throw e;
+		}
 		
 		return userVo;
 	}

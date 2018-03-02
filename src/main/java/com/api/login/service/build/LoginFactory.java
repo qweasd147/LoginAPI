@@ -81,7 +81,7 @@ public abstract class LoginFactory implements LoginAPI{
 	
 	public abstract String getAuthorizationBaseURL();
 	
-	public abstract UserVo getUserVo(JSONObject userProfile);
+	public abstract UserVo getUserVo(JSONObject userProfile) throws Exception;
 	
 	public abstract String logoutProcess() throws IOException;
 	
@@ -220,7 +220,15 @@ public abstract class LoginFactory implements LoginAPI{
 		}
 		*/
 		
-		UserVo userVo = getUserVo(userProfile);
+		UserVo userVo = null;
+		try {
+			userVo = getUserVo(userProfile);
+		} catch (Exception e) {
+			//parsing exception
+			//e.printStackTrace();
+			
+			userVo = null;
+		}
 		
 		return userVo;
 	}

@@ -95,6 +95,7 @@ public class NaverAPI extends LoginFactory{
 	public UserVo getUserVo(JSONObject profile) {
 		
 		String result = (String) profile.get("message");
+		UserVo userVo = new UserVo();
 		
 		if(!"success".equals(result)){
 			
@@ -103,20 +104,24 @@ public class NaverAPI extends LoginFactory{
 			return null;
 		};
 		
-		UserVo userVo = new UserVo();
-		
-		JSONObject respJSON = (JSONObject) profile.get("response");
-		
-		String id = (String) respJSON.get("id");
-		String name = (String) respJSON.get("name");
-		String nickName = (String) respJSON.get("nickname");
-		String email = (String) respJSON.get("email");
-		
-		userVo.setId(id)
-				.setName(name)
-				.setNickName(nickName)
-				.setEmail(email)
-				.setServiceName("naver");
+		try {
+			
+			JSONObject respJSON = (JSONObject) profile.get("response");
+			
+			String id = (String) respJSON.get("id");
+			String name = (String) respJSON.get("name");
+			String nickName = (String) respJSON.get("nickname");
+			String email = (String) respJSON.get("email");
+			
+			userVo.setId(id)
+					.setName(name)
+					.setNickName(nickName)
+					.setEmail(email)
+					.setServiceName("naver");
+		} catch (Exception e) {
+			//parsing exception
+			throw e;
+		}
 		
 		return userVo;
 	}
