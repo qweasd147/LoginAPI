@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.api.WebUtil;
@@ -40,6 +42,10 @@ public class LoginController{
 	
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
+	/**
+	 * 로그인 성공 후 이동할 URL
+	 */
+	public String SUCCESS_LOGIN_URL="redirect:/";
 	
 	//차후 API에서 받은 사용자 정보를 바탕으로 프로젝트 내 DB 조회 등 목적으로 만들어 놓기만 한 service 
 	//@Autowired
@@ -75,10 +81,38 @@ public class LoginController{
 		
         return "loginList";
     }
- 
-    @RequestMapping("/logOut")
+	
+	/**
+	 * 각 서비스 별 login 처리를 진행한다.
+	 * code, state는 callback을 호출 시, 외부(각 api 서비스 하는 곳)에서 제공받음
+	 * @param code
+	 * @param state
+	 * @param req
+	 * @param model
+	 * @return
+	 * @throws Exception 
+	 */
+    @RequestMapping("/api/authen/login/{serviceName}/callback")
+    public String serviceLoginCB(@RequestParam String code
+    		, @PathVariable("serviceName") String serviceName
+    		, @RequestParam String state, HttpServletRequest req
+    		, Model model) throws Exception {
+		
+		String beanName = serviceName+"Login";
+		
+		LoginAPI serviceFactory = (LoginAPI) WebUtil.getBean(req, beanName);
+		
+		if(serviceFactory != null)
+			serviceFactory.login(req, code, state);
+		
+		//TODO : null값 일 시, 처리 해야함
+		
+        return SUCCESS_LOGIN_URL;
+    }
+    
+    @RequestMapping("/logout")
     @ResponseBody
-    public Map<String, String> logOut(HttpServletRequest req, Model model) throws IOException {
+    public Map<String, String> logout(HttpServletRequest req, Model model) throws IOException {
     	
     	Map<String, String> map = new HashMap<String, String>();
     	
@@ -101,6 +135,7 @@ public class LoginController{
     	
     	return map;
     }
+    
     
     @RequestMapping("/checkSession")
     @ResponseBody

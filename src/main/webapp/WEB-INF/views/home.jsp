@@ -13,7 +13,7 @@
 <p>
 	<a href="${pageContext.request.contextPath}/login">로그인 페이지</a>
 	<a href="#none" id="checkSession">세션 확인</a>
-	<a href="#none" id="logOut">로그아웃</a>
+	<a href="#none" id="logout">로그아웃</a>
 </p>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script type="text/javascript">
@@ -32,10 +32,10 @@
 				});  
 		});
 		
-		$('#logOut').on('click',function(){
+		$('#logout').on('click',function(){
 			$.ajax({  
 				  type: 'POST',  
-				  url: "/logOut",  
+				  url: "/logout",  
 				  data: null,  
 				  success: function(data){
 					  alert('ajax 통신 성공');

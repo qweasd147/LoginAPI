@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.api.model.UserVo;
@@ -30,10 +29,6 @@ public interface LoginAPI{
 	 * 프로퍼티에서 logout api 주소를 불러올 키값
 	 */
 	public String LOGOUT_KEY="v1.token.delete";
-	
-	public interface UserMethod{
-		public UserVo getUserVo(JSONObject profile);
-	};
 	
 	/**
 	 * 로그인 요청 URL을 반환한다.

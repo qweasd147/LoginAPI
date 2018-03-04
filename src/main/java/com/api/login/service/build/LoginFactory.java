@@ -1,7 +1,6 @@
 package com.api.login.service.build;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -40,16 +39,7 @@ public abstract class LoginFactory implements LoginAPI{
 	 * 그 외 정보는 다른곳에서 구지 핸들링 할 필요가 없을꺼 같음 
 	 */
 	
-	/*
-	private String serviceName;
-	private String clientId;
-	private String clientSecret;
-	private String redirectURL;
-	*/
 	private static final JSONParser JSON_PARSER = new JSONParser();
-	
-	//private LoginAPI.UserMethod userMethod;
-	
 	
 	//request 주소를 담은 프로퍼티
 	@Resource(name="requestURL")
