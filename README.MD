@@ -44,7 +44,7 @@
 	3.3 token을 사용하여 사용자 프로필 정보 요청
 	3.4 프로필 정보와 access token을 session에 저장
 
-
+****
 ## 4. API 서비스 추가에 따른 불가피한 수정 사항
 
 ### 4.1 추상 클래스 LoginFactory의 getUserVo 추상 메소드
@@ -82,7 +82,7 @@ request.properties 파일을 확인하면 아래와 같은 정보를 확인 할 
 	kakao.v1.token.delete=https://kapi.kakao.com/v1/user/logout
 	google.v1.user.profile=https://www.googleapis.com/plus/v1/people/me
 	google.v1.token.delete=https://accounts.google.com/o/oauth2/revoke
-
+****
 ## 5. 문제점
 
 ### 5.1 API 요청 시 scribejava 외부 라이브러리를 쓰는데 이게 디버깅이 너무 힘듦. 그냥 http 요청도 내가 직접 만들어야 하나 고민중
